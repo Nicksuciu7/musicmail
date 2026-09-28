@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { expandGenres, genreParents } from "./taxonomy";
 export const relationships = [
   "unknown",
   "cold",
@@ -107,8 +108,9 @@ export type Template = {
   subject: string;
   body: string;
 };
-export type List = { id: string; name: string };
+export type List = { id: string; name: string; member_count?: number };
 export type SavedView = {
+  scope?: "explore" | "network";
   id: string;
   name: string;
   filter_definition: Filters;
@@ -124,6 +126,24 @@ export type SentEmail = {
   gmail_message_id?: string;
 };
 export type Workspace = {
+  profile?:{display_name:string|null;timezone:string;country:string|null}|null;
+  contactCount?: number;
+  networkEntityIds?: string[];
+  artist?: {
+    id: string;
+    name: string;
+    type:
+      | "solo"
+      | "band"
+      | "duo"
+      | "collective"
+      | "producer_project"
+      | "dj_project"
+      | "other";
+    location: string;
+    genres: string[];
+    emotions: string[];
+  } | null;
   demo: boolean;
   email: string;
   artistName: string;
@@ -172,7 +192,7 @@ export function matchesEntity(e: Entity, f: Filters) {
     has(f.roles, e.roles) &&
     has(f.organisationTypes, [e.organisation_type]) &&
     has(f.locations, [e.location]) &&
-    has(f.genres, e.genres) &&
+    has(expandGenres(f.genres, genreParents), e.genres) &&
     has(f.emotions, e.emotions) &&
     (!f.submission || f.submission === e.submission_status) &&
     (!f.submissionType || f.submissionType === e.submission_type) &&
@@ -301,12 +321,18 @@ export const templateSchema = z
     }
   }, "Unsupported template variable");
 export const actionSchema = z.discriminatedUnion("action", [
+  z.object({action:z.literal("profile"),display_name:z.string().trim().min(1).max(100),timezone:z.string().max(80).refine(value=>{try{new Intl.DateTimeFormat("en",{timeZone:value});return true}catch{return false}},"Choose a valid timezone"),country:z.string().max(80).default("")}),
   z.object({ action: z.literal("add"), entityId: z.uuid() }),
   z.object({ action: z.literal("private"), contact: privateContactSchema }),
   z.object({
     action: z.literal("update"),
     id: z.uuid(),
     patch: z.object({
+      private_display_name: z.string().trim().min(1).max(200).optional(),
+      private_email: z.union([z.email(), z.literal("")]).optional(),
+      private_details: z
+        .record(z.string().max(50), z.string().max(500))
+        .optional(),
       relationship_status: z.enum(relationships).optional(),
       outreach_status: z.enum(outreachStates).optional(),
       priority: z.enum(["low", "medium", "high"]).nullable().optional(),
@@ -332,6 +358,7 @@ export const actionSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("view"),
+    scope: z.enum(["explore", "network"]).default("explore"),
     name: z.string().trim().min(1).max(100),
     filters: filterSchema,
     columns: z.array(z.string()).max(20).default([]),

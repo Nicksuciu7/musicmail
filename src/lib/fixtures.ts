@@ -307,6 +307,20 @@ export const defaultTemplates: Template[] = [
     body: "Hi {{first_name}},\n\nI’m sharing a new release from {{artist_name}} for consideration at {{organisation}}.\n\n[Add one private listening link and a short description of the music.]\n\nThank you for your time,\n{{artist_name}}",
   },
 ];
+for (const [name, category] of [
+  ["Share a stage", "Support slot"],
+  ["A room for our music", "Venue booking"],
+  ["See you in the field", "Festival application"],
+  ["A story to share", "Press pitch"],
+  ["Something for the airwaves", "Radio submission"],
+])
+  defaultTemplates.push({
+    id: `20000000-0000-4000-8000-${String(defaultTemplates.length + 1).padStart(12, "0")}`,
+    name,
+    category,
+    subject: `${category} — {{artist_name}}`,
+    body: "Hi {{first_name}},\n\nI’m reaching out from {{artist_name}} about a possible fit with {{organisation}}.\n\n[Add a specific personal connection, relevant dates and one listening link. Follow any published submission guidance.]\n\nThanks for your time,\n{{artist_name}}",
+  });
 export function demoWorkspace(): Workspace {
   return {
     demo: true,

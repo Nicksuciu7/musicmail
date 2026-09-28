@@ -44,3 +44,52 @@ set role authenticated;
 select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
 do $$ begin if (select count(*) from sent_emails)<>0 then raise exception 'Email metadata leaked';end if;end $$;
 reset role;
+-- Extended integration checks for exports, templates, network query and admin separation.
+set role authenticated;
+select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
+do $$ begin
+ if (network_contacts('{"relationship":"warm"}')->>'total')::int<>1 then raise exception 'Private network filtering failed';end if;
+ if jsonb_array_length(workspace_document()->'contacts')<>2 then raise exception 'Workspace export incomplete';end if;
+ if (select count(*) from email_templates)<>8 then raise exception 'Onboarding templates missing';end if;
+ begin insert into user_contacts(user_id) values(auth.uid());raise exception 'Null identity accepted';exception when check_violation then null;end;
+end $$;
+reset role;
+insert into admin_users values('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+set role authenticated;
+select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
+do $$ begin
+ if (select count(*) from notes)<>0 then raise exception 'Admin leaked private notes';end if;
+ begin insert into venues(entity_id) values('10000000-0000-4000-8000-000000000001');raise exception 'Subtype mismatch accepted';exception when raise_exception then if SQLERRM='Subtype mismatch accepted' then raise;end if;end;
+end $$;
+select merge_entities('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000013',true);
+do $$ begin
+ if not exists(select 1 from entity_contact_methods where entity_id='10000000-0000-4000-8000-000000000013' and value='hello@mosslightpresents.example') then raise exception 'Merge lost public contact';end if;
+ if not exists(select 1 from entity_sources where entity_id='10000000-0000-4000-8000-000000000013') then raise exception 'Merge lost provenance';end if;
+end $$;
+select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
+do $$ begin
+ if not exists(select 1 from user_contacts where entity_id='10000000-0000-4000-8000-000000000013') then raise exception 'Merge failed to relink owner contact';end if;
+ if (select count(*) from notes)<>2 then raise exception 'Merge lost private notes';end if;
+end $$;
+reset role;
+-- Owner removal cascades through private data and owned canonical artist.
+delete from auth.users where id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+do $$ begin if exists(select 1 from notes where user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') or exists(select 1 from entities where created_by='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') then raise exception 'Account deletion incomplete';end if;end $$;
+-- Bound normal page data while preserving exports beyond PostgREST's usual row cap.
+set role authenticated;
+select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
+insert into user_contacts(private_display_name,private_email) select 'Volume contact '||g,'volume'||g||'@example.test' from generate_series(1,1105) g;
+do $$ begin
+ if jsonb_array_length(workspace_summary()->'contacts')<>50 then raise exception 'Workspace summary is not bounded';end if;
+ if jsonb_array_length(workspace_document()->'contacts')<>1106 then raise exception 'Export truncated beyond 1000 records';end if;
+ if jsonb_array_length(network_contacts('{"page":2}')->'items')<>12 then raise exception 'Network pagination failed';end if;
+ if (network_contacts('{"q":"Volume contact 1105"}')->>'total')::int<>1 then raise exception 'Search outside initial page failed';end if;
+end $$;
+update user_contacts set outreach_status='not_contacted' where id='bbbbbbbb-0000-4000-8000-000000000001';
+reset role;
+set role service_role;
+do $$ declare i integer;begin
+ for i in 1..30 loop perform reserve_email(gen_random_uuid(),'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','bbbbbbbb-0000-4000-8000-000000000001');end loop;
+ begin perform reserve_email(gen_random_uuid(),'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','bbbbbbbb-0000-4000-8000-000000000001');raise exception 'Rate limit failed';exception when raise_exception then if SQLERRM='Rate limit failed' then raise;end if;end;
+end $$;
+reset role;

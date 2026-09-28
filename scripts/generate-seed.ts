@@ -134,6 +134,8 @@ for (const city of cities)
   sql += `insert into locations(city,slug) values(${quote(city)},${quote(slug(city))}) on conflict(slug) do nothing;\n`;
 for (const e of entities) {
   sql += `insert into entities(id,entity_type,display_name,description,slug,primary_location_id) values('${e.id}',${quote(e.entity_type)},${quote(e.display_name)},${quote(e.description)},${quote(slug(e.display_name))},(select id from locations where city=${quote(e.location)})) on conflict(id) do nothing;\n`;
+  for (const alias of e.aliases)
+    sql += `insert into entity_aliases(entity_id,alias,normalised_alias) values('${e.id}',${quote(alias)},${quote(alias.toLowerCase())}) on conflict do nothing;\n`;
   const sub =
     e.entity_type === "organisation"
       ? `insert into organisations(entity_id,organisation_type_id) values('${e.id}',(select id from organisation_types where name=${quote(e.organisation_type)}))`
