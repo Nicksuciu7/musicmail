@@ -42,6 +42,7 @@ export const filterSchema = z.object({
   outreach: z.string().default(""),
   priority: z.string().default(""),
   followUp: z.enum(["", "overdue", "today", "upcoming"]).default(""),
+  lastContact: z.enum(["", "never", "recent", "older"]).default(""),
   list: z.string().default(""),
   sort: z.enum(["name", "recent"]).default("name"),
   page: z.number().int().min(1).max(10000).default(1),
@@ -49,6 +50,13 @@ export const filterSchema = z.object({
 export type Filters = z.infer<typeof filterSchema>;
 export const emptyFilters = filterSchema.parse({});
 export type Entity = {
+  contact_methods?: {
+    id: string;
+    contact_type: string;
+    value: string;
+    label?: string | null;
+    purpose?: string | null;
+  }[];
   id: string;
   entity_type: "person" | "organisation" | "artist_project" | "venue";
   display_name: string;
@@ -126,7 +134,11 @@ export type SentEmail = {
   gmail_message_id?: string;
 };
 export type Workspace = {
-  profile?:{display_name:string|null;timezone:string;country:string|null}|null;
+  profile?: {
+    display_name: string | null;
+    timezone: string;
+    country: string | null;
+  } | null;
   contactCount?: number;
   networkEntityIds?: string[];
   artist?: {
@@ -243,6 +255,17 @@ export function matchesContact(
     } as Entity);
   return (
     !c.archived &&
+    (!f.lastContact ||
+      (f.lastContact === "never"
+        ? !c.last_contacted_at
+        : !!c.last_contacted_at &&
+          (f.lastContact === "recent"
+            ? new Date(today).getTime() -
+                new Date(c.last_contacted_at).getTime() <=
+              30 * 86400000
+            : new Date(today).getTime() -
+                new Date(c.last_contacted_at).getTime() >
+              30 * 86400000))) &&
     matchesEntity(e, f) &&
     (!f.relationship || f.relationship === c.relationship_status) &&
     (!f.outreach || f.outreach === c.outreach_status) &&
@@ -321,7 +344,22 @@ export const templateSchema = z
     }
   }, "Unsupported template variable");
 export const actionSchema = z.discriminatedUnion("action", [
-  z.object({action:z.literal("profile"),display_name:z.string().trim().min(1).max(100),timezone:z.string().max(80).refine(value=>{try{new Intl.DateTimeFormat("en",{timeZone:value});return true}catch{return false}},"Choose a valid timezone"),country:z.string().max(80).default("")}),
+  z.object({
+    action: z.literal("profile"),
+    display_name: z.string().trim().min(1).max(100),
+    timezone: z
+      .string()
+      .max(80)
+      .refine((value) => {
+        try {
+          new Intl.DateTimeFormat("en", { timeZone: value });
+          return true;
+        } catch {
+          return false;
+        }
+      }, "Choose a valid timezone"),
+    country: z.string().max(80).default(""),
+  }),
   z.object({ action: z.literal("add"), entityId: z.uuid() }),
   z.object({ action: z.literal("private"), contact: privateContactSchema }),
   z.object({

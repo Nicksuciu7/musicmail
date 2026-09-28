@@ -53,10 +53,17 @@ export async function POST(request: Request) {
       throw new Error(
         "Unable to sign in. Check your details or confirm your email.",
       );
-    const prefs=result.data.session?await db.from("user_preferences").select("onboarding_completed").eq("user_id",result.data.user.id).maybeSingle():null;
+    const prefs =
+      result.data.session && result.data.user
+        ? await db
+            .from("user_preferences")
+            .select("onboarding_completed")
+            .eq("user_id", result.data.user.id)
+            .maybeSingle()
+        : null;
     return NextResponse.json(
       result.data.session
-        ? { url: prefs?.data?.onboarding_completed?"/home":"/onboarding" }
+        ? { url: prefs?.data?.onboarding_completed ? "/home" : "/onboarding" }
         : {
             message: "Check your email to confirm your account, then sign in.",
           },

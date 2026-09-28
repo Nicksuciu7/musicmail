@@ -88,7 +88,13 @@ export function mutateDemo(id: string, a: Action) {
     }
   };
   switch (a.action) {
-    case "profile":w.profile={display_name:a.display_name,timezone:a.timezone,country:a.country};break;
+    case "profile":
+      w.profile = {
+        display_name: a.display_name,
+        timezone: a.timezone,
+        country: a.country,
+      };
+      break;
     case "add": {
       const e = entities.find((e) => e.id === a.entityId);
       if (!e) throw new Error("Entity not found.");

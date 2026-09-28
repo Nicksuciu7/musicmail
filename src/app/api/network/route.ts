@@ -17,7 +17,7 @@ export async function GET(request: Request) {
             filters,
             w.members,
             new Date().toLocaleDateString("en-CA", {
-              timeZone: w.profile?.timezone||"Europe/London",
+              timeZone: w.profile?.timezone || "Europe/London",
             }),
           ),
         )

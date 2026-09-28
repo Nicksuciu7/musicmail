@@ -21,7 +21,7 @@ export async function workspace(
     const w = readDemo(user.id);
     if (full) return w;
     const today = new Date().toLocaleDateString("en-CA", {
-      timeZone: w.profile?.timezone||"Europe/London",
+      timeZone: w.profile?.timezone || "Europe/London",
     });
     const active = w.contacts.filter((c) => !c.archived);
     const picked = new Set(
@@ -112,7 +112,18 @@ export async function mutate(a: Action) {
   const db = await supabase();
   const owner = { user_id: user.id };
   switch (a.action) {
-    case "profile":checked(await db.from("profiles").upsert({id:user.id,display_name:a.display_name,timezone:a.timezone,country:a.country}));break;
+    case "profile":
+      checked(
+        await db
+          .from("profiles")
+          .upsert({
+            id: user.id,
+            display_name: a.display_name,
+            timezone: a.timezone,
+            country: a.country,
+          }),
+      );
+      break;
     case "add": {
       const entity = checked(await db.rpc("get_entity", { eid: a.entityId }));
       if (!entity) throw new Error("Entity unavailable.");
