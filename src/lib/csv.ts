@@ -70,7 +70,7 @@ export function validateRows(
 }
 export function csvSafe(v: unknown) {
   const s = String(v ?? "");
-  return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+  return /^[\s\uFEFF]*[=+\-@]|^[\t\r\n]/.test(s) ? `'${s}` : s;
 }
 export function exportCsv(w: Workspace) {
   return Papa.unparse(

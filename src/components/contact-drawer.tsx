@@ -107,7 +107,7 @@ export function ContactDrawer({
               defaultValue={contact.private_email || ""}
               key={contact.id + "email"}
               onBlur={(ev) => {
-                if (ev.target.value !== contact.private_email)
+                if (ev.target.value !== (contact.private_email || ""))
                   update({ private_email: ev.target.value });
               }}
             />
@@ -300,7 +300,7 @@ export function ContactDrawer({
               key={contact.id}
               placeholder="A show, an introduction, a happy coincidence…"
               onBlur={(e) => {
-                if (e.target.value !== contact.relationship_origin)
+                if (e.target.value !== (contact.relationship_origin || ""))
                   update({ relationship_origin: e.target.value });
               }}
             />
