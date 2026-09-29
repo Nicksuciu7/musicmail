@@ -22,4 +22,4 @@ SQL tests use real PostgreSQL roles and RLS with a minimal Supabase Auth identit
 
 No external emails were sent and no hosted deployment was made. Those gates remain in [release-checklist.md](release-checklist.md).
 
-Repository preparation reran `npm run build`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:e2e`, `npm run test:db` and `npm audit`. All passed with the results above. Publication is pending the CLI/authentication handoff in [publishing.md](publishing.md).
+Repository preparation reran `npm run build`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:e2e`, `npm run test:db` and `npm audit`. All passed with the results above. GitHub repository details and the release procedure are in [publishing.md](publishing.md).

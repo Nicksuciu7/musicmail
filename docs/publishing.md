@@ -1,12 +1,14 @@
-# GitHub publication handoff
+# GitHub repository and releases
 
-Local preparation is complete. GitHub publication has not happened: `gh` is not installed in this environment, and the available connector does not expose repository creation or release creation. No remote was added, no push was attempted, and no GitHub release was created.
+The public repository is [Nicksuciu7/musicmail](https://github.com/Nicksuciu7/musicmail), with `main` as the default branch and `origin` set to `https://github.com/Nicksuciu7/musicmail.git`. The original local handoff was completed after GitHub CLI installation and authentication. The commands below document the publication procedure; do not create the repository again.
+
+The beta release notes are in [release-v0.9.0.md](release-v0.9.0.md). Hosting the source on GitHub does not mean the application is deployed or live Supabase/Gmail acceptance is complete.
 
 ## Preserved version
 
 `v0.9.0` is an annotated tag at `7d9397121961a51b0a6f3851f64f0f0a4090c4c1`, subject `docs: document local beta and hosted release setup`. It correctly identifies the original local beta. Repository preparation follows it as a documentation/configuration commit. The package remains 0.9.0; do not move the tag or create 0.9.1.
 
-## Publish manually
+## Publication procedure (reference)
 
 Install GitHub CLI (on macOS with Homebrew):
 

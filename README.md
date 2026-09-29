@@ -26,9 +26,11 @@ All screenshots show synthetic contacts from the local demo.
 
 ## Local development
 
-Clone the eventual GitHub repository using its published URL, then change into its `musicmail` directory. A remote URL has not been assigned yet. Requires Node.js 22.12+ and npm. The included demonstration needs no external accounts.
+Requires Node.js 22.12+ and npm. The included demonstration needs no external accounts.
 
 ```bash
+git clone https://github.com/Nicksuciu7/musicmail.git
+cd musicmail
 npm ci
 cp .env.example .env.local
 npm run dev
@@ -129,7 +131,7 @@ Browser tests cover artist setup, Explore, a private relationship, template prev
 - [Release checklist and known limitations](docs/release-checklist.md)
 - [Recorded local verification](docs/verification.md)
 - [Changelog](CHANGELOG.md)
-- [GitHub publication handoff](docs/publishing.md)
+- [GitHub repository and release procedure](docs/publishing.md)
 
 ## Roadmap
 
