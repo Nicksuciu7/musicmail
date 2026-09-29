@@ -1,5 +1,9 @@
 # Product
 
+## Current v0.9 scope
+
+The local beta serves independent solo artists, bands and small artist teams managing their own professional relationships. Demo data is fictional; hosted Supabase and live Gmail acceptance remain pending. UX simplification is the next planned product pass.
+
 MusicMail helps an independent musician find relevant music-industry contacts, privately organise relationships and send thoughtful outreach. Its focus is the UK independent music community.
 
 The directory is music-native: roles, organisation classifications, hierarchical genres, optional emotions, locations, public contact purposes and submission guidance. A search for London + Promoter + Indie Folk + Intimate produces representative matches immediately in the synthetic demo.

@@ -2,23 +2,31 @@
 
 **Your music industry network, organised.**
 
-MusicMail is a music-native directory, private relationship workspace and personal outreach tool for independent musicians. It is the first product from **GreenRoom Network**.
+MusicMail is a music-industry discovery, CRM and outreach tool built for independent musicians. It is the first product from **GreenRoom Network**.
 
-**Local beta · v0.9.0** — working demonstration and Supabase-backed implementation. Production deployment and live Google OAuth remain release gates; this is deliberately not tagged v1.0.0.
+## Current status
 
-![MusicMail Explore: discover independent music contacts by role, city, genre and feeling](docs/screenshots/explore-desktop.png)
+**Current release: v0.9.0 local beta**
 
-More screenshots: [My Network](docs/screenshots/network-desktop.png) · [Contact details](docs/screenshots/contact-drawer.png) · [Email composer](docs/screenshots/email-composer.png) · [Mobile](docs/screenshots/explore-mobile.png)
+The core local beta works with fictional demo data. Gmail production sending is not enabled in the demo and live OAuth/sending verification remains pending. Live Supabase verification also remains pending. Version 1.0.0 follows production infrastructure verification, security/privacy checks and final UX refinement.
 
-## Why it exists
+## Problem
 
-A musician’s professional network is scattered across spreadsheets, inboxes, notes and social profiles. MusicMail brings together who someone is, the music they work with, how to approach them and what happened last time.
+A musician’s professional network is scattered across spreadsheets, Gmail, Notion, social media, submission platforms and personal notes. MusicMail brings together who someone is, the music they work with, how to approach them and what happened last time.
 
 The journey is **Discover → Add to Network → Organise → Contact → Follow up**. Genre, emotion, industry role and submission information are built in. There is no empty database to design before getting started.
 
-## Run it locally
+## Screenshots
 
-Requires Node.js 22.12+ and npm. The included demonstration needs no external accounts.
+All screenshots show synthetic contacts from the local demo.
+
+![Explore music contacts](docs/screenshots/explore-desktop.png)
+
+[My Network](docs/screenshots/network-desktop.png) · [Contact detail](docs/screenshots/contact-drawer.png) · [Email preview](docs/screenshots/email-composer.png) · [Mobile Explore](docs/screenshots/explore-mobile.png)
+
+## Local development
+
+Clone the eventual GitHub repository using its published URL, then change into its `musicmail` directory. A remote URL has not been assigned yet. Requires Node.js 22.12+ and npm. The included demonstration needs no external accounts.
 
 ```bash
 npm ci
@@ -32,7 +40,7 @@ Demo contacts are **fictional**, use reserved `.example` addresses, and are labe
 
 For real authentication and durable storage, follow [development setup](docs/development.md) and set `MUSICMAIL_DEMO=false`.
 
-## What you can do
+## Features
 
 - Set up a solo artist, band, duo or other canonical artist project.
 - Explore a paginated directory by role, location, genre, emotion, submission status and contact availability.
@@ -47,7 +55,7 @@ For real authentication and durable storage, follow [development setup](docs/dev
 
 No inbox synchronisation, reply detection, tracking pixels, campaigns, social feed or speculative GreenRoom features.
 
-## Architecture
+## Product architecture
 
 ```mermaid
 flowchart LR
@@ -64,7 +72,7 @@ The central design is **one canonical entity identity + a private CRM overlay**.
 
 Subtype tables keep venue capacity, person names and artist types out of the universal identity table. This preserves a useful foundation for GreenRoom without building that future platform now. See the [architecture review and ER diagram](docs/architecture.md) and [database guide](docs/database.md).
 
-## Stack
+## Tech stack
 
 Next.js App Router · React · strict TypeScript · Tailwind CSS · Radix/shadcn-style accessible UI · Supabase Auth/PostgreSQL · Zod · Papa Parse · Lucide · Vitest · React Testing Library · Playwright.
 
@@ -92,7 +100,7 @@ Read [security](docs/security.md), [email security review](docs/email-security.m
 
 Never put service credentials or encryption keys in `NEXT_PUBLIC_*` variables. `.env.local`, `.data`, logs and test artifacts are ignored.
 
-## Validation
+## Testing
 
 ```bash
 npm run typecheck
@@ -109,7 +117,7 @@ The PostgreSQL suite starts an isolated temporary cluster, applies every migrati
 
 Browser tests cover artist setup, Explore, a private relationship, template previews, CSV import, lists, export, session isolation and mobile layout. Additional automated accessibility checks cover WCAG A/AA on key screens. Live Gmail sending needs a configured test account; see [release gates](docs/release-checklist.md).
 
-## Project guide
+## Architecture documentation
 
 - [Product and scope](docs/product.md)
 - [Architecture and route map](docs/architecture.md)
@@ -121,12 +129,27 @@ Browser tests cover artist setup, Explore, a private relationship, template prev
 - [Release checklist and known limitations](docs/release-checklist.md)
 - [Recorded local verification](docs/verification.md)
 - [Changelog](CHANGELOG.md)
+- [GitHub publication handoff](docs/publishing.md)
 
 ## Roadmap
 
-Before 1.0: exercise real Supabase Auth and Gmail in staging, complete consent-screen/operational reviews, load verified professional records, measure realistic data volumes, deploy and pass the full release checklist. Local synthetic records demonstrate the workflow; they are not a production industry dataset.
+### v0.9.x
 
-Later GreenRoom products can reuse canonical entity IDs. Events, ticketing, teams, recommendations and social features remain outside this V1.
+- UX simplification and production infrastructure verification.
+
+### v1.0.0
+
+- Live Supabase acceptance and verified Gmail OAuth/sending.
+- Production deployment and final security/privacy checks.
+
+### Later
+
+- A richer, verified shared industry database.
+- GreenRoom integration and broader discovery/network features, subject to product validation.
+
+## License
+
+No license has been selected and no LICENSE file is present. Public availability does not grant an open-source license. A license decision remains with the project owner.
 
 ## Author
 

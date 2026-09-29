@@ -1,4 +1,4 @@
-# Local verification — 28 September 2026
+# Local verification — 29 September 2026
 
 Environment: macOS, Node.js 25.2.1, Next.js 16.3.6, PostgreSQL 14.18. The hosted Supabase config targets PostgreSQL 17; its actual runtime remains a staging check.
 
@@ -21,3 +21,5 @@ The browser suite covers artist setup, music filtering, adding a contact, privat
 SQL tests use real PostgreSQL roles and RLS with a minimal Supabase Auth identity shim. Gmail tests mock the provider. Neither verifies live Google consent, token refresh/revocation against Google, Supabase GoTrue, Vercel runtime configuration or a deployed application.
 
 No external emails were sent and no hosted deployment was made. Those gates remain in [release-checklist.md](release-checklist.md).
+
+Repository preparation reran `npm run build`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:e2e`, `npm run test:db` and `npm audit`. All passed with the results above. Publication is pending the CLI/authentication handoff in [publishing.md](publishing.md).

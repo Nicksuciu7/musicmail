@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0 — 2026-09-28 — Local beta
+## [0.9.0] — 2026-09-28 — Local beta
 
 ### Added
 
@@ -20,6 +20,8 @@
 - Suppression and rate limits, no automatic retry on uncertain delivery, CSV formula neutralisation.
 
 ### Known limitations
+
+- UX simplification is planned before v1.0.0.
 
 - Local beta only. Live Supabase/Gmail acceptance and production deployment are pending.
 - Synthetic records are not a verified industry dataset. See `docs/release-checklist.md`.

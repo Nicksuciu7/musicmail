@@ -1,6 +1,6 @@
 # Hosted setup
 
-The requested deliverable for this session is local development plus hosted setup documentation. No remote repository, Supabase project, OAuth client or Vercel deployment was created or assumed.
+The application is currently local only. No Supabase project, OAuth client or Vercel deployment has been created or verified. GitHub publication is prepared separately in [publishing.md](publishing.md).
 
 ## 1. Supabase
 
