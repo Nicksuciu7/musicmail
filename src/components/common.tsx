@@ -1,5 +1,5 @@
 "use client";
-import { Music2, Sparkles, Plus, Check } from "lucide-react";
+import { Music2, Plus, Check } from "lucide-react";
 import type { Entity } from "@/lib/domain";
 export function Brand() {
   return (
@@ -26,17 +26,27 @@ export function Avatar({ name, index = 0 }: { name: string; index?: number }) {
 export function Tags({
   values,
   emotion = false,
+  limit = 3,
 }: {
   values: string[];
   emotion?: boolean;
+  limit?: number;
 }) {
   return (
     <>
-      {values.map((value) => (
+      {values.slice(0, limit).map((value) => (
         <span key={value} className={`tag ${emotion ? "emotion" : ""}`}>
           {value}
         </span>
       ))}
+      {values.length > limit && (
+        <span
+          className="tag-count"
+          aria-label={`${values.length - limit} more tags`}
+        >
+          +{values.length - limit}
+        </span>
+      )}
     </>
   );
 }
@@ -46,14 +56,13 @@ export function Empty({
   children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   children?: React.ReactNode;
 }) {
   return (
     <div className="empty-state">
-      <Sparkles size={27} style={{ margin: "auto" }} />
       <h3>{title}</h3>
-      <p>{description}</p>
+      {description && <p>{description}</p>}
       {children}
     </div>
   );
@@ -81,6 +90,7 @@ export function AddButton({
       }
     >
       {added ? <Check size={14} /> : <Plus size={14} />}
+      {added ? "In My Network" : "Add to My Network"}
     </button>
   );
 }
@@ -90,7 +100,7 @@ export function Heading({
   description,
   children,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description: string;
   children?: React.ReactNode;
@@ -98,7 +108,7 @@ export function Heading({
   return (
     <div className="page-heading">
       <div>
-        <div className="eyebrow">{eyebrow}</div>
+        {eyebrow && <div className="eyebrow">{eyebrow}</div>}
         <h1 className="page-title">{title}</h1>
         <p className="page-description">{description}</p>
       </div>

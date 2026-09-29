@@ -8,7 +8,6 @@ import {
   Users,
   Folder,
   Mail,
-  FileText,
   Settings as SettingsIcon,
   Music2,
   ChevronDown,
@@ -16,7 +15,6 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Bookmark,
 } from "lucide-react";
 import { request, updateWorkspace } from "@/lib/client";
 import {
@@ -51,7 +49,6 @@ const nav = [
   ["network", "My Network", Users],
   ["lists", "Lists", Folder],
   ["mail", "Mail", Mail],
-  ["templates", "Templates", FileText],
 ] as const;
 export function Workspace({ page }: { page: string }) {
   const router = useRouter();
@@ -150,7 +147,14 @@ export function Workspace({ page }: { page: string }) {
     setPicker(false);
     setEmailIds(ids);
   };
-  const gotoView = (f: Filters, target = "explore") => {
+  const gotoView = (f: Filters, target = "explore", columns?: string[]) => {
+    if (target === "network" && columns) {
+      localStorage.setItem(
+        "musicmail-network-columns",
+        JSON.stringify(columns),
+      );
+      window.dispatchEvent(new Event("musicmail-columns"));
+    }
     setFilterState(f);
     router.push(`/${target}?filters=${encodeURIComponent(JSON.stringify(f))}`);
   };
@@ -189,48 +193,17 @@ export function Workspace({ page }: { page: string }) {
         <nav aria-label="Main navigation">
           {nav.map(([path, title, Icon]) => (
             <Link
-              className={`nav-link ${page === path ? "active" : ""}`}
+              className={`nav-link ${page === path || (page === "templates" && path === "mail") ? "active" : ""}`}
               key={path}
               href={`/${path}`}
               onClick={() => setMobile(false)}
             >
               <Icon size={17} strokeWidth={1.6} />
               {title}
-              {path === "network" && !!w?.contactCount && (
-                <span className="nav-count">{w.contactCount}</span>
-              )}
             </Link>
           ))}
         </nav>
-        {!!w?.views.length && (
-          <>
-            <div className="nav-section">SAVED VIEWS</div>
-            {w.views.slice(0, 4).map((v) => (
-              <button
-                key={v.id}
-                className="nav-link"
-                style={{ background: "none", border: 0, textAlign: "left" }}
-                onClick={() => {
-                  if (v.scope === "network" && v.visible_columns.length)
-                    localStorage.setItem(
-                      "musicmail-network-columns",
-                      JSON.stringify(v.visible_columns),
-                    );
-                  gotoView(v.filter_definition, v.scope || "explore");
-                }}
-              >
-                <Bookmark size={14} />
-                {v.name}
-              </button>
-            ))}
-          </>
-        )}
         <div className="sidebar-bottom">
-          <div className="sidebar-note">
-            A little connection.
-            <br />A world of possibility.{" "}
-            <span style={{ color: "#586546" }}>✧</span>
-          </div>
           {w?.isAdmin && (
             <Link
               className={`nav-link ${page === "admin" ? "active" : ""}`}
@@ -247,25 +220,6 @@ export function Workspace({ page }: { page: string }) {
             <SettingsIcon size={17} strokeWidth={1.6} />
             Settings
           </Link>
-          <div className="user-chip">
-            <span className="user-avatar">
-              {(w?.artistName || "M").slice(0, 1)}
-            </span>
-            <div style={{ flex: 1 }}>
-              {w?.onboarded ? w.artistName : "Make yourself at home"}
-              <small
-                style={{
-                  display: "block",
-                  fontSize: 10,
-                  color: "#5b6253",
-                  marginTop: 4,
-                }}
-              >
-                Independent. Together.
-              </small>
-            </div>
-            <ChevronDown size={12} />
-          </div>
         </div>
       </aside>
       <main className="main">
@@ -282,7 +236,11 @@ export function Workspace({ page }: { page: string }) {
             <span style={{ color: "#5e6158" }}>/</span>
             <strong style={{ fontWeight: 500, color: "#5a664f" }}>
               {nav.find((n) => n[0] === page)?.[1] ||
-                (page === "admin" ? "Database admin" : "Settings")}
+                (page === "templates"
+                  ? "Mail"
+                  : page === "admin"
+                    ? "Database admin"
+                    : "Settings")}
             </strong>
           </div>
           <div className="topbar-actions">
@@ -359,6 +317,7 @@ export function Workspace({ page }: { page: string }) {
                     setSaveView(true);
                   }}
                   onError={report}
+                  onView={gotoView}
                 />
               )}
               {page === "network" && (
@@ -374,6 +333,7 @@ export function Workspace({ page }: { page: string }) {
                     setSaveView(true);
                   }}
                   onEmail={compose}
+                  onView={gotoView}
                   mutate={mutate}
                 />
               )}
@@ -396,6 +356,22 @@ export function Workspace({ page }: { page: string }) {
                   mutate={mutate}
                 />
               )}
+              {(page === "mail" || page === "templates") && (
+                <nav className="tabs" aria-label="Mail navigation">
+                  <Link
+                    href="/mail"
+                    className={`tab ${page === "mail" ? "active" : ""}`}
+                  >
+                    Activity
+                  </Link>
+                  <Link
+                    href="/templates"
+                    className={`tab ${page === "templates" ? "active" : ""}`}
+                  >
+                    Templates
+                  </Link>
+                </nav>
+              )}
               {page === "mail" && (
                 <MailScreen w={w} onCompose={() => setPicker(true)} />
               )}
@@ -409,6 +385,12 @@ export function Workspace({ page }: { page: string }) {
       {w && (
         <>
           <ContactDrawer
+            key={
+              entity?.id ||
+              w.contacts.find((c) => c.id === contactId)?.entity_id ||
+              contactId ||
+              "closed"
+            }
             entity={entity}
             contact={
               contactId

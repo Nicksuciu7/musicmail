@@ -1,22 +1,14 @@
 "use client";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  ArrowUpRight,
-  MapPin,
-  ChevronLeft,
-  ChevronRight,
-  Leaf,
-  Music2,
-  Building2,
-  Users,
-  Disc3,
-  Radio,
-  Tent,
-  ArrowUpDown,
-} from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { request } from "@/lib/client";
-import { label, type Entity, type Filters, type Workspace } from "@/lib/domain";
+import {
+  emptyFilters,
+  label,
+  type Entity,
+  type Filters,
+  type Workspace,
+} from "@/lib/domain";
 import { Heading, Avatar, Tags, Empty, AddButton } from "./common";
 import { FilterBar } from "./filters";
 export function Explore({
@@ -27,6 +19,7 @@ export function Explore({
   onAdd,
   onSave,
   onError,
+  onView,
 }: {
   workspace: Workspace;
   filters: Filters;
@@ -35,6 +28,7 @@ export function Explore({
   onAdd: (e: Entity) => Promise<void>;
   onSave: () => void;
   onError: (s: string) => void;
+  onView: (f: Filters, target?: string, columns?: string[]) => void;
 }) {
   const [data, setData] = useState<{ items: Entity[]; total: number }>({
     items: [],
@@ -42,7 +36,6 @@ export function Explore({
   });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
-  const [tab, setTab] = useState("All contacts");
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -64,75 +57,19 @@ export function Explore({
       controller.abort();
     };
   }, [filters, onError]);
-  const tabs = [
-    ["All contacts", Users],
-    ["Promoters", Music2],
-    ["Venues", Building2],
-    ["Labels", Disc3],
-    ["Press & radio", Radio],
-    ["Festivals", Tent],
-  ] as const;
-  function choose(name: string) {
-    setTab(name);
-    setFilters({
-      ...filters,
-      page: 1,
-      types: name === "Venues" ? ["venue"] : [],
-      roles: name === "Promoters" ? ["Promoter"] : [],
-      organisationTypes:
-        name === "Labels"
-          ? ["Record label"]
-          : name === "Press & radio"
-            ? ["Publication", "Radio station"]
-            : name === "Festivals"
-              ? ["Festival"]
-              : [],
-    });
-  }
   return (
     <>
       <Heading
-        eyebrow="Good music starts with a connection"
-        title="Find your people."
-        description="Discover the people and places that could be part of your next chapter."
-      >
-        <Link className="button" href="/network">
-          My Network <ArrowUpRight size={14} />
-        </Link>
-      </Heading>
-      <div className="hero-panel">
-        <div>
-          <div className="eyebrow">A world of possibility</div>
-          <h2>Your sound. The right ears.</h2>
-          <p>
-            From the venue down the road to the label you’ve always loved.
-            <br />
-            Find a little common ground. Start something good.
-          </p>
-        </div>
-        <div className="hero-art" aria-hidden="true">
-          <div className="orbit" />
-          <div className="orbit" />
-          <div className="orbit" />
-          <div className="orbit">
-            <Music2 size={39} strokeWidth={1} />
-          </div>
-          <span className="art-star">✧</span>
-        </div>
-      </div>
-      <div className="tabs">
-        {tabs.map(([name, Icon]) => (
-          <button
-            key={name}
-            className={`tab ${tab === name ? "active" : ""}`}
-            onClick={() => choose(name)}
-          >
-            <Icon size={14} />
-            {name}
-          </button>
-        ))}
-      </div>
-      <FilterBar filters={filters} setFilters={setFilters} onSave={onSave} />
+        title="Explore"
+        description="Find the right people for your music."
+      />
+      <FilterBar
+        filters={filters}
+        setFilters={setFilters}
+        onSave={onSave}
+        views={workspace.views}
+        onView={onView}
+      />
       <div className="result-meta">
         <span>
           <strong>{data.total} connections</strong> to explore{" "}
@@ -165,14 +102,12 @@ export function Explore({
         </div>
       ) : data.items.length ? (
         <div className="table-wrap">
-          <table className="data-table">
+          <table className="data-table explore-table">
             <thead>
               <tr>
                 <th>Name</th>
                 <th>Location</th>
-                <th>Genres</th>
-                <th className="optional-col">The feeling</th>
-                <th>Submissions</th>
+                <th>Music</th>
                 <th aria-label="Add to network" />
               </tr>
             </thead>
@@ -193,7 +128,7 @@ export function Explore({
                           {e.organisation_type ||
                             e.roles[0] ||
                             label(e.entity_type)}
-                          {e.capacity ? ` · ${e.capacity} capacity` : ""}
+                          {e.organisation ? ` · ${e.organisation}` : ""}
                         </div>
                       </div>
                     </div>
@@ -204,22 +139,23 @@ export function Explore({
                       {e.location}
                     </span>
                   </td>
-                  <td>
-                    <Tags values={e.genres.slice(0, 2)} />
-                  </td>
-                  <td className="optional-col">
-                    <Tags values={e.emotions.slice(0, 2)} emotion />
-                  </td>
-                  <td>
-                    <span
-                      className={`tag ${e.submission_status === "open" ? "open" : ""}`}
-                    >
-                      {e.submission_status === "open"
-                        ? "↗ Open"
-                        : e.submission_status === "closed"
-                          ? "— Closed"
-                          : "Unknown"}
-                    </span>
+                  <td className="music-cell">
+                    <Tags values={e.genres.slice(0, 2)} limit={2} />
+                    <Tags values={e.emotions.slice(0, 1)} emotion limit={1} />
+                    {e.genres.length + e.emotions.length >
+                      Math.min(e.genres.length, 2) +
+                        Math.min(e.emotions.length, 1) && (
+                      <span
+                        className="tag-count"
+                        aria-label="More music tags in contact details"
+                      >
+                        +
+                        {e.genres.length +
+                          e.emotions.length -
+                          Math.min(e.genres.length, 2) -
+                          Math.min(e.emotions.length, 1)}
+                      </span>
+                    )}
                   </td>
                   <td className="add-td">
                     <AddButton
@@ -242,10 +178,11 @@ export function Explore({
           </table>
         </div>
       ) : (
-        <Empty
-          title="Your people are out there."
-          description="Try a broader genre, another city or fewer filters to discover more connections."
-        />
+        <Empty title="No contacts match these filters.">
+          <button className="button" onClick={() => setFilters(emptyFilters)}>
+            Clear filters
+          </button>
+        </Empty>
       )}
       <div className="table-footer">
         <span>
@@ -274,12 +211,6 @@ export function Explore({
             <ChevronRight size={13} />
           </button>
         </div>
-      </div>
-      <div className="bottom-note">
-        <Leaf size={12} />
-        {workspace.demo
-          ? "A safe space to explore. All demo contacts are fictional."
-          : "Built for meaningful connections. Always make it personal."}
       </div>
     </>
   );

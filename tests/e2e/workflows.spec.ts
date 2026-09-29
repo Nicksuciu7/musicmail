@@ -35,7 +35,7 @@ test("artist → discover → private relationship → template preview", async 
     page.getByText("Met after the show. Send our new EP.", { exact: true }),
   ).toBeVisible();
   await page.getByLabel("Relationship", { exact: true }).selectOption("warm");
-  await page.getByRole("button", { name: "Write an email" }).click();
+  await page.getByRole("button", { name: "Email", exact: true }).click();
   await page
     .getByLabel("Choose email template")
     .selectOption({ label: "A first introduction" });
@@ -80,12 +80,14 @@ test("CSV mapping, lists, saved views and export", async ({ page }) => {
   await page
     .getByLabel("Add selected to list")
     .selectOption({ label: "EP launch" });
+  await page.getByText("Views", { exact: true }).click();
   await page.getByRole("button", { name: "Save view" }).click();
   await page.getByLabel("View name").fill("People to meet");
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Save view" })
     .click();
+  await page.getByText("Views", { exact: true }).click();
   await expect(
     page.getByRole("button", { name: "People to meet" }),
   ).toBeVisible();
@@ -116,7 +118,9 @@ test("sessions are isolated, CSRF is rejected, mobile fits", async ({
   const other = await browser.newContext();
   const p = await other.newPage();
   await p.goto("http://localhost:3000/network");
-  await expect(p.getByText("Every connection starts somewhere.")).toBeVisible();
+  await expect(
+    p.getByText("Your network starts with one contact."),
+  ).toBeVisible();
   await other.close();
   const denied = await page.request.post("/api/workspace", {
     data: { action: "list", name: "CSRF" },

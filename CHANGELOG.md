@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.9.1] — 2026-09-29 — UX simplification
+
+### Changed
+
+- Search-first Explore with four primary filters and secondary controls behind More filters.
+- Compact Views menu, three music tags per result with overflow counts, and explicit network actions.
+- Quieter Network table; genre columns available through Columns and bulk actions shown only on selection.
+- Contact, relationship, follow-up and notes first; metadata, history and editing controls in disclosures.
+- Templates under Mail; grouped Home and Settings content, flat Lists and Templates layouts.
+- Shorter copy, restrained colors/borders, mobile layouts and a smaller default onboarding genre selection.
+- Existing routes, schema, privacy boundaries, CSV, lists, notes and outreach functionality preserved.
+
+### Fixed
+
+- Completed optional platform dependency entries in the lockfile so npm 10 can install in GitHub CI.
+
+### Verification
+
+- Added a browser regression journey for progressive disclosure and the core discovery-to-email-preview flow.
+- Existing automated checks retained; see docs/verification.md for results and limitations.
+
+### Known limitations
+
+- Fictional local demo; live Supabase and Gmail acceptance and production deployment remain pending.
+
 ## [0.9.0] — 2026-09-28 — Local beta
 
 ### Added

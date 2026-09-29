@@ -5,6 +5,7 @@ import { request } from "@/lib/client";
 import { Plus, Upload, Download, Mail, Columns3, MapPin } from "lucide-react";
 import {
   contactName,
+  emptyFilters,
   relationships,
   outreachStates,
   label,
@@ -24,6 +25,7 @@ export function Network({
   onImport,
   onSave,
   onEmail,
+  onView,
   mutate,
 }: {
   workspace: Workspace;
@@ -34,39 +36,44 @@ export function Network({
   onImport: () => void;
   onSave: (columns?: string[]) => void;
   onEmail: (ids: string[]) => void;
+  onView: (f: Filters, target?: string, columns?: string[]) => void;
   mutate: (a: Action) => Promise<void>;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [showColumns, setShowColumns] = useState(false);
   const [columns, setColumns] = useState([
     "location",
-    "genres",
     "relationship",
     "outreach",
     "followup",
   ]);
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("musicmail-network-columns");
-      if (raw) {
-        const values = JSON.parse(raw);
-        if (
-          Array.isArray(values) &&
-          values.every((v) =>
-            [
-              "location",
-              "genres",
-              "relationship",
-              "outreach",
-              "followup",
-              "priority",
-              "last_contact",
-            ].includes(v),
+    const restore = () => {
+      try {
+        const raw = localStorage.getItem("musicmail-network-columns");
+        if (raw) {
+          const values = JSON.parse(raw);
+          if (
+            Array.isArray(values) &&
+            values.every((v) =>
+              [
+                "location",
+                "genres",
+                "relationship",
+                "outreach",
+                "followup",
+                "priority",
+                "last_contact",
+              ].includes(v),
+            )
           )
-        )
-          setColumns(values);
-      }
-    } catch {}
+            setColumns(values);
+        }
+      } catch {}
+    };
+    restore();
+    window.addEventListener("musicmail-columns", restore);
+    return () => window.removeEventListener("musicmail-columns", restore);
   }, []);
   const saveColumns = (next: string[]) => {
     setColumns(next);
@@ -109,9 +116,8 @@ export function Network({
   return (
     <>
       <Heading
-        eyebrow="Good relationships, thoughtfully kept"
         title="My Network"
-        description="The people you know. The connections you’re growing."
+        description="Keep track of your relationships and next steps."
       >
         <div className="actions">
           <button className="button" onClick={onImport}>
@@ -134,54 +140,58 @@ export function Network({
         setFilters={setFilters}
         network
         onSave={() => onSave(columns)}
-      />
-      <div className="filter-row">
-        <select
-          className="filter-select"
-          aria-label="Relationship filter"
-          value={filters.relationship}
-          onChange={(e) =>
-            setFilters({ ...filters, relationship: e.target.value, page: 1 })
-          }
-        >
-          <option value="">All relationships</option>
-          {relationships.map((v) => (
-            <option key={v} value={v}>
-              {label(v)}
-            </option>
-          ))}
-        </select>
-        <select
-          className="filter-select"
-          aria-label="Outreach filter"
-          value={filters.outreach}
-          onChange={(e) =>
-            setFilters({ ...filters, outreach: e.target.value, page: 1 })
-          }
-        >
-          <option value="">All outreach</option>
-          {outreachStates.map((v) => (
-            <option key={v} value={v}>
-              {label(v)}
-            </option>
-          ))}
-        </select>
-        <select
-          className="filter-select"
-          aria-label="List filter"
-          value={filters.list}
-          onChange={(e) =>
-            setFilters({ ...filters, list: e.target.value, page: 1 })
-          }
-        >
-          <option value="">All lists</option>
-          {workspace.lists.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name}
-            </option>
-          ))}
-        </select>
-      </div>
+        views={workspace.views}
+        lists={workspace.lists}
+        onView={onView}
+      >
+        <div className="filter-row">
+          <select
+            className="filter-select"
+            aria-label="Relationship filter"
+            value={filters.relationship}
+            onChange={(e) =>
+              setFilters({ ...filters, relationship: e.target.value, page: 1 })
+            }
+          >
+            <option value="">All relationships</option>
+            {relationships.map((v) => (
+              <option key={v} value={v}>
+                {label(v)}
+              </option>
+            ))}
+          </select>
+          <select
+            className="filter-select"
+            aria-label="Outreach filter"
+            value={filters.outreach}
+            onChange={(e) =>
+              setFilters({ ...filters, outreach: e.target.value, page: 1 })
+            }
+          >
+            <option value="">All outreach</option>
+            {outreachStates.map((v) => (
+              <option key={v} value={v}>
+                {label(v)}
+              </option>
+            ))}
+          </select>
+          <select
+            className="filter-select"
+            aria-label="List filter"
+            value={filters.list}
+            onChange={(e) =>
+              setFilters({ ...filters, list: e.target.value, page: 1 })
+            }
+          >
+            <option value="">All lists</option>
+            {workspace.lists.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </FilterBar>
       <div className="result-meta">
         <span>
           <strong>{total} contacts</strong> · Only visible to you
@@ -190,6 +200,7 @@ export function Network({
           <button
             className="clear-filters"
             onClick={() => setShowColumns(!showColumns)}
+            aria-expanded={showColumns}
           >
             <Columns3 size={12} style={{ display: "inline" }} /> Columns
           </button>
@@ -272,7 +283,7 @@ export function Network({
       ) : total ? (
         <>
           <div className="table-wrap">
-            <table className="data-table">
+            <table className="data-table network-table">
               <thead>
                 <tr>
                   <th>
@@ -350,7 +361,7 @@ export function Network({
                       </div>
                     </td>
                     {columns.map((col) => (
-                      <td key={col}>
+                      <td key={col} data-column={col}>
                         {col === "location" ? (
                           <span className="location">
                             <MapPin size={11} />
@@ -461,12 +472,21 @@ export function Network({
         </>
       ) : (
         <Empty
-          title="Every connection starts somewhere."
-          description="Find your people in Explore, import your spreadsheet, or add someone you’ve met along the way."
+          title={
+            workspace.contactCount
+              ? "No contacts match these filters."
+              : "Your network starts with one contact."
+          }
         >
-          <Link className="button primary" href="/explore">
-            Explore the directory →
-          </Link>
+          {workspace.contactCount ? (
+            <button className="button" onClick={() => setFilters(emptyFilters)}>
+              Clear filters
+            </button>
+          ) : (
+            <Link className="button primary" href="/explore">
+              Explore the directory →
+            </Link>
+          )}
         </Empty>
       )}
     </>

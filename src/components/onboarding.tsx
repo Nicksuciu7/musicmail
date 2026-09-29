@@ -10,6 +10,7 @@ import { CsvImporter } from "./csv-importer";
 export function Onboarding() {
   const router = useRouter();
   const { genres, emotions: allEmotions, cities } = useTaxonomies();
+  const [showAllGenres, setShowAllGenres] = useState(false);
   const [showAllEmotions, setShowAllEmotions] = useState(false);
   const emotions = showAllEmotions
     ? allEmotions
@@ -105,7 +106,10 @@ export function Onboarding() {
         <Link href="/">
           <Brand />
         </Link>
-        <div className="step-indicator">
+        <div
+          className="step-indicator"
+          aria-label={`Step ${step + 1} of ${titles.length}`}
+        >
           {titles.map((_, i) => (
             <span className={i <= step ? "current" : ""} key={i} />
           ))}
@@ -116,14 +120,14 @@ export function Onboarding() {
         <h1>{titles[step]}</h1>
         <p>
           {step === 0
-            ? "Just your project name is required. Everything else can come later."
+            ? "Only your project name is required."
             : step === 2
               ? "Choose a few words that resonate. You can always skip this."
               : step === 4
-                ? "Your existing contacts can feel at home here, too. Import a CSV or come back later."
+                ? "Import your contacts now or skip for later."
                 : step === 5
                   ? "Gmail is optional. Explore the directory first, or connect when you’re ready."
-                  : "A little context helps you find the right people."}
+                  : "Optional — you can change this later."}
         </p>
         {error && (
           <div className="error-banner" role="alert">
@@ -143,6 +147,7 @@ export function Onboarding() {
                 ["other", "Other"],
               ].map(([id, text]) => (
                 <button
+                  aria-pressed={type === id}
                   className={`choice ${type === id ? "selected" : ""}`}
                   key={id}
                   onClick={() => setType(id as typeof type)}
@@ -190,9 +195,18 @@ export function Onboarding() {
             <div className="choice-grid">
               {genres
                 .filter((g) => g.toLowerCase().includes(search.toLowerCase()))
+                .filter(
+                  (g, i) =>
+                    search ||
+                    showAllGenres ||
+                    selectedGenres.includes(g) ||
+                    i < 12 ||
+                    g === "Indie Folk",
+                )
                 .map((g) => (
                   <button
                     key={g}
+                    aria-pressed={selectedGenres.includes(g)}
                     className={`choice ${selectedGenres.includes(g) ? "selected" : ""}`}
                     onClick={() => toggle(g, selectedGenres, setGenres, 5)}
                   >
@@ -200,6 +214,15 @@ export function Onboarding() {
                   </button>
                 ))}
             </div>
+            {!search && (
+              <button
+                className="clear-filters"
+                aria-expanded={showAllGenres}
+                onClick={() => setShowAllGenres(!showAllGenres)}
+              >
+                {showAllGenres ? "Fewer genres" : "All genres"}
+              </button>
+            )}
             <p className="muted">{selectedGenres.length}/5 genres · optional</p>
           </>
         )}
@@ -208,6 +231,7 @@ export function Onboarding() {
             {emotions.map((e) => (
               <button
                 key={e}
+                aria-pressed={selectedEmotions.includes(e)}
                 className={`choice ${selectedEmotions.includes(e) ? "selected" : ""}`}
                 onClick={() => toggle(e, selectedEmotions, setEmotions, 12)}
               >
@@ -239,6 +263,7 @@ export function Onboarding() {
               "Organise existing contacts",
             ].map((g) => (
               <button
+                aria-pressed={goals.includes(g)}
                 className={`choice ${goals.includes(g) ? "selected" : ""}`}
                 key={g}
                 onClick={() => toggle(g, goals, setGoals, 10)}
@@ -272,6 +297,15 @@ export function Onboarding() {
             <Link className="muted" href="/explore">
               Look around first
             </Link>
+          )}
+          {step > 0 && step < 4 && (
+            <button
+              className="clear-filters"
+              disabled={busy || !w}
+              onClick={() => (step === 3 ? void save() : setStep(step + 1))}
+            >
+              Skip
+            </button>
           )}
           <button
             className="button primary"

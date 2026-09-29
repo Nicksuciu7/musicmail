@@ -2,17 +2,30 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, X, Bookmark } from "lucide-react";
 import { useTaxonomies } from "@/hooks/use-taxonomies";
-import { emptyFilters, label, type Filters } from "@/lib/domain";
+import {
+  emptyFilters,
+  label,
+  type Workspace,
+  type Filters,
+} from "@/lib/domain";
 export function FilterBar({
   filters,
   setFilters,
   network = false,
   onSave,
+  views,
+  onView,
+  children,
+  lists = [],
 }: {
   filters: Filters;
   setFilters: (f: Filters) => void;
   network?: boolean;
   onSave: () => void;
+  views: Workspace["views"];
+  onView: (f: Filters, target?: string, columns?: string[]) => void;
+  children?: React.ReactNode;
+  lists?: Workspace["lists"];
 }) {
   const {
     cities,
@@ -61,43 +74,70 @@ export function FilterBar({
             value={filters.q}
             onChange={(e) => set({ q: e.target.value })}
           />
-          <span className="search-shortcut">Find your next connection</span>
         </label>
-        <button
-          className="button"
-          onClick={() => setMore(!more)}
-          aria-expanded={more}
-        >
-          <SlidersHorizontal size={14} />
-          Filters
-        </button>
-        <button className="button" onClick={onSave}>
-          <Bookmark size={14} />
-          Save view
-        </button>
+        <details className="view-menu">
+          <summary className="button">
+            <Bookmark size={14} /> Views
+          </summary>
+          <div className="view-options">
+            {views
+              .filter((v) => v.scope === (network ? "network" : "explore"))
+              .map((v) => (
+                <button
+                  key={v.id}
+                  className="view-option"
+                  onClick={(ev) => {
+                    onView(v.filter_definition, v.scope, v.visible_columns);
+                    ev.currentTarget
+                      .closest("details")
+                      ?.removeAttribute("open");
+                  }}
+                >
+                  {v.name}
+                </button>
+              ))}
+            <button
+              className="view-option"
+              onClick={(ev) => {
+                ev.currentTarget.closest("details")?.removeAttribute("open");
+                onSave();
+              }}
+            >
+              Save view
+            </button>
+          </div>
+        </details>
       </div>
       <div className="filter-row">
         {dropdown("roles", "Role", roleNames)}
         {dropdown("locations", "Location", cities)}
         {dropdown("genres", "Genre", genres)}
         {dropdown("emotions", "Emotion", emotions)}
-        {dropdown("organisationTypes", "Organisation", orgTypes)}
-        <select
-          className="filter-select"
-          aria-label="Submissions"
-          value={filters.submission}
-          onChange={(e) =>
-            set({ submission: e.target.value as Filters["submission"] })
-          }
+        <button
+          className="button"
+          onClick={() => setMore(!more)}
+          aria-expanded={more}
+          aria-controls="advanced-filters"
         >
-          <option value="">Submissions</option>
-          <option value="open">Open submissions</option>
-          <option value="closed">Closed</option>
-          <option value="unknown">Unknown</option>
-        </select>
+          <SlidersHorizontal size={14} /> More filters
+        </button>
       </div>
       {more && (
-        <div className="column-menu">
+        <div className="column-menu advanced-filters" id="advanced-filters">
+          {dropdown("organisationTypes", "Organisation", orgTypes)}
+          <select
+            className="filter-select"
+            aria-label="Submissions"
+            value={filters.submission}
+            onChange={(e) =>
+              set({ submission: e.target.value as Filters["submission"] })
+            }
+          >
+            <option value="">Submissions</option>
+            <option value="open">Open submissions</option>
+            <option value="closed">Closed</option>
+            <option value="unknown">Unknown</option>
+          </select>
           <label>
             <input
               className="check"
@@ -163,6 +203,7 @@ export function FilterBar({
               set({ exclude: e.target.value.split(",").filter(Boolean) })
             }
           />
+          {children}
           {network && (
             <>
               <select
@@ -214,6 +255,8 @@ export function FilterBar({
             "genres",
             "emotions",
             "organisationTypes",
+            "types",
+            "exclude",
           ] as const
         ).flatMap((key) =>
           filters[key].map((v) => (
@@ -224,10 +267,55 @@ export function FilterBar({
                 set({ [key]: filters[key].filter((x) => x !== v) })
               }
             >
-              {v}
+              {label(v)}
               <X size={10} />
             </button>
           )),
+        )}
+        {(
+          [
+            "submission",
+            "submissionType",
+            "relationship",
+            "outreach",
+            "priority",
+            "lastContact",
+            "followUp",
+          ] as const
+        )
+          .filter((key) => filters[key])
+          .map((key) => (
+            <button
+              className="filter-chip"
+              key={key}
+              aria-label={`Remove ${label(key)} filter`}
+              onClick={() => set({ [key]: "" })}
+            >
+              {label(filters[key])}
+              <X size={10} />
+            </button>
+          ))}
+        {(["email", "verified"] as const)
+          .filter((key) => filters[key])
+          .map((key) => (
+            <button
+              className="filter-chip"
+              key={key}
+              onClick={() => set({ [key]: false })}
+            >
+              {key === "email" ? "Email available" : "Verified"}
+              <X size={10} />
+            </button>
+          ))}
+        {filters.list && (
+          <button
+            className="filter-chip"
+            onClick={() => set({ list: "" })}
+            aria-label="Remove list filter"
+          >
+            {lists.find((l) => l.id === filters.list)?.name || "List"}
+            <X size={10} />
+          </button>
         )}
         {JSON.stringify(filters) !== JSON.stringify(emptyFilters) && (
           <button

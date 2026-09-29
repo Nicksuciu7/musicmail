@@ -74,8 +74,12 @@ try {
     .getByRole("button", { name: "Mosslight Presents", exact: true })
     .click();
   await page.getByLabel("Private note", { exact: true }).waitFor();
+  await page
+    .locator(".network-table .entity-name")
+    .filter({ hasText: "Mosslight Presents" })
+    .waitFor({ state: "visible" });
   await page.screenshot({ path: "docs/screenshots/contact-drawer.png" });
-  await page.getByRole("button", { name: "Write an email" }).click();
+  await page.getByRole("button", { name: "Email", exact: true }).click();
   await page
     .getByLabel("Choose email template")
     .selectOption({ label: "A first introduction" });
@@ -90,9 +94,37 @@ try {
     path: "docs/screenshots/explore-mobile.png",
     fullPage: true,
   });
+  await page.setViewportSize({ width: 1440, height: 1050 });
+  for (const route of [
+    "home",
+    "lists",
+    "mail",
+    "templates",
+    "settings",
+    "onboarding",
+  ]) {
+    await page.goto(origin + "/" + route);
+    await page.getByRole("heading", { level: 1 }).waitFor();
+    await page.screenshot({
+      path: `docs/screenshots/${route}-desktop.png`,
+      fullPage: true,
+    });
+  }
+  await page.goto(origin + "/network");
+  await page.getByRole("button", { name: "Import CSV", exact: true }).click();
+  await page.getByLabel("CSV file").setInputFiles({
+    name: "demo.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(
+      "Name,Email,Notes\nDemo Booker,booker@example.test,Demo introduction",
+    ),
+  });
+  await page.getByRole("button", { name: "Validate & preview" }).click();
+  await page.getByRole("button", { name: "Import 1 contacts" }).waitFor();
+  await page.screenshot({ path: "docs/screenshots/csv-import.png" });
   if (errors.length) throw new Error(errors.join("\n"));
   console.log(
-    "Five synthetic product screenshots saved; no browser runtime errors.",
+    "Twelve synthetic product screenshots saved; no browser runtime errors.",
   );
 } finally {
   await browser.close();

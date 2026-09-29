@@ -4,13 +4,9 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   Plus,
-  Folder,
   Mail,
-  Clock,
-  Bookmark,
   Download,
   LogOut,
-  ShieldCheck,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -38,7 +34,7 @@ export function Home({
   onOpen: (c: Contact) => void;
   onNew: () => void;
   onImport: () => void;
-  onView: (f: Filters, target?: string) => void;
+  onView: (f: Filters, target?: string, columns?: string[]) => void;
   onCompose: () => void;
 }) {
   const today = new Date().toLocaleDateString("en-CA", {
@@ -75,52 +71,30 @@ export function Home({
   );
   return (
     <>
-      <Heading
-        eyebrow="A little momentum, every day"
-        title="Make your next move."
-        description="Pick up a conversation. Keep a good connection growing."
-      >
+      <Heading title="Home" description="What needs your attention?">
         <Link className="button primary" href="/explore">
           Find your people <ArrowUpRight size={14} />
         </Link>
       </Heading>
       {!w.onboarded && (
-        <div className="hero-panel">
-          <div>
-            <div className="eyebrow">Make yourself at home</div>
-            <h2>A little about your music.</h2>
-            <p>
-              Set up your artist project in a minute or two. Your next chapter
-              starts here.
-            </p>
-          </div>
-          <Link className="button" href="/onboarding">
-            Set up your project →
-          </Link>
-        </div>
+        <p className="setup-prompt">
+          <Link href="/onboarding">Set up your artist profile →</Link>
+        </p>
       )}
       <div className="attention-grid">
         <div className="attention-stack">
           <section className="panel">
             <div className="panel-header">
-              <h3>Conversations to pick up</h3>
-              <Clock size={18} />
+              <h3>Follow-ups due</h3>
             </div>
-            {due.length ? (
-              due.map(row)
-            ) : (
-              <Empty
-                title="All caught up."
-                description="Add a follow-up date to a contact and we’ll keep it here for you."
-              />
+            {due.length ? due.map(row) : <p>No follow-ups due.</p>}
+            {upcoming.length > 0 && (
+              <details className="disclosure">
+                <summary>Upcoming follow-ups</summary>
+                {upcoming.map(row)}
+              </details>
             )}
           </section>
-          {upcoming.length > 0 && (
-            <section className="panel">
-              <h3>Coming up</h3>
-              {upcoming.map(row)}
-            </section>
-          )}
           <section className="panel">
             <h3>Recently emailed</h3>
             {w.sent.length ? (
@@ -134,16 +108,13 @@ export function Home({
                 </div>
               ))
             ) : (
-              <p>
-                Your sent messages will appear here. Connect Gmail when you’re
-                ready to reach out.
-              </p>
+              <p>No messages sent through MusicMail yet.</p>
             )}
           </section>
         </div>
         <div className="attention-stack">
           <section className="panel">
-            <h3>A good place to start</h3>
+            <h3>Quick actions</h3>
             <div className="actions">
               <button className="button small" onClick={onNew}>
                 <Plus size={13} />
@@ -160,7 +131,7 @@ export function Home({
             </div>
           </section>
           <section className="panel">
-            <h3>Recent connections</h3>
+            <h3>Recent contacts</h3>
             {w.contacts
               .filter((c) => !c.archived)
               .slice(0, 4)
@@ -173,26 +144,29 @@ export function Home({
           </section>
           <section className="panel">
             <h3>Your saved views</h3>
-            {w.views.map((v) => (
-              <button
-                className="list-row"
-                style={{
-                  background: "none",
-                  borderTop: 0,
-                  borderRight: 0,
-                  borderLeft: 0,
-                  width: "100%",
-                  textAlign: "left",
+            {!!w.views.length && (
+              <select
+                className="filter-select"
+                aria-label="Saved view"
+                value=""
+                onChange={(event) => {
+                  const view = w.views.find((v) => v.id === event.target.value);
+                  if (view)
+                    onView(
+                      view.filter_definition,
+                      view.scope,
+                      view.visible_columns,
+                    );
                 }}
-                key={v.id}
-                onClick={() =>
-                  onView(v.filter_definition, v.scope || "explore")
-                }
               >
-                <Bookmark size={15} />
-                <strong>{v.name}</strong>
-              </button>
-            ))}
+                <option value="">Choose a view…</option>
+                {w.views.map((v) => (
+                  <option value={v.id} key={v.id}>
+                    {v.name}
+                  </option>
+                ))}
+              </select>
+            )}
             {!w.views.length && (
               <p>
                 Save your favourite filters in Explore or My Network to find
@@ -219,9 +193,8 @@ export function Lists({
   return (
     <>
       <Heading
-        eyebrow="A little organisation goes a long way"
-        title="Lists with a purpose."
-        description="An EP launch. A new city. The people you want to reach next."
+        title="Lists"
+        description="Group the people you want to reach."
       />
       <form
         className="search-row"
@@ -251,40 +224,53 @@ export function Lists({
       </form>
       {error && <div className="error-banner">{error}</div>}
       {w.lists.length ? (
-        <div className="cards-grid">
+        <div className="simple-list">
           {w.lists.map((l) => (
-            <article className="panel" key={l.id}>
-              <div className="panel-header">
-                <Folder size={24} />
-                <button
-                  className="icon-button"
-                  aria-label={`Delete ${l.name}`}
-                  onClick={() =>
-                    mutate({ action: "deleteList", id: l.id }).catch((e) =>
-                      setError(e.message),
-                    )
-                  }
-                >
-                  <Trash2 size={13} />
-                </button>
+            <article className="list-row" key={l.id}>
+              <div className="list-row-main">
+                <h3>
+                  <button
+                    className="entity-name"
+                    onClick={() => onSelect(l.id)}
+                  >
+                    {l.name}
+                  </button>
+                </h3>
+                <p>
+                  {l.member_count ??
+                    w.members.filter((m) => m.list_id === l.id).length}{" "}
+                  contacts
+                </p>
               </div>
-              <h3>{l.name}</h3>
-              <p>
-                {l.member_count ??
-                  w.members.filter((m) => m.list_id === l.id).length}{" "}
-                connections
-              </p>
               <button className="button small" onClick={() => onSelect(l.id)}>
-                Open list <ArrowUpRight size={13} />
+                Open list
               </button>
+              <details className="view-menu">
+                <summary
+                  className="button small"
+                  aria-label={`Options for ${l.name}`}
+                >
+                  More
+                </summary>
+                <div className="view-options">
+                  <button
+                    className="view-option danger"
+                    aria-label={`Delete ${l.name}`}
+                    onClick={() =>
+                      mutate({ action: "deleteList", id: l.id }).catch((e) =>
+                        setError(e.message),
+                      )
+                    }
+                  >
+                    <Trash2 size={13} /> Delete list
+                  </button>
+                </div>
+              </details>
             </article>
           ))}
         </div>
       ) : (
-        <Empty
-          title="A place for your next idea."
-          description="Create a list, then add contacts from My Network or their contact details."
-        />
+        <Empty title="Create a list to group your contacts." />
       )}
     </>
   );
@@ -316,9 +302,8 @@ export function MailScreen({
   return (
     <>
       <Heading
-        eyebrow="Make every hello count"
-        title="Your correspondence."
-        description="Personal messages. Real conversations. All in one place."
+        title="Mail"
+        description="Compose a message or revisit recent MusicMail activity."
       >
         <button className="button primary" onClick={onCompose}>
           <Plus size={14} />
@@ -326,19 +311,12 @@ export function MailScreen({
         </button>
       </Heading>
       {!w.gmailEmail && (
-        <div className="hero-panel">
-          <div>
-            <div className="eyebrow">From your own inbox</div>
-            <h2>A more personal kind of outreach.</h2>
-            <p>
-              Connect Gmail to send individually tailored messages from your own
-              address.
-            </p>
-          </div>
-          <Link className="button" href="/settings">
-            Email settings <ArrowUpRight size={14} />
-          </Link>
-        </div>
+        <p className="setup-prompt">
+          {w.demo
+            ? "Demo mode: preview messages without sending."
+            : "Connect Gmail to send from your own address."}{" "}
+          <Link href="/settings">Email settings →</Link>
+        </p>
       )}
       {error && (
         <div className="error-banner" role="alert">
@@ -361,10 +339,7 @@ export function MailScreen({
           ))}
         </section>
       ) : (
-        <Empty
-          title="The start of a conversation."
-          description="Messages sent through MusicMail appear here. Replies stay in Gmail; update outreach status when you hear back."
-        />
+        <Empty title="No messages sent through MusicMail yet." />
       )}
       {mail.total > 20 && (
         <div className="pagination" style={{ marginTop: 20 }}>
@@ -410,9 +385,8 @@ export function Templates({
   return (
     <>
       <Heading
-        eyebrow="A starting point, never a script"
-        title="Words to build on."
-        description="Save a little time. Leave plenty of room for the personal touches."
+        title="Templates"
+        description="Starting points for a personal message."
       >
         <button
           className="button primary"
@@ -424,12 +398,12 @@ export function Templates({
           New template
         </button>
       </Heading>
-      <div className="cards-grid">
+      <div className="template-list">
         {w.templates.map((t) => (
           <article className="panel" key={t.id}>
-            <span className="tag">{t.category}</span>
+            <span className="muted">{t.category}</span>
             <h3 style={{ marginTop: 15 }}>{t.name}</h3>
-            <p style={{ whiteSpace: "pre-line" }}>{t.body.slice(0, 150)}…</p>
+            <p>{t.subject}</p>
             <button className="button small" onClick={() => setEditing(t)}>
               Edit template <ArrowUpRight size={13} />
             </button>
@@ -535,8 +509,7 @@ export function Settings({
   return (
     <>
       <Heading
-        eyebrow="Your corner of the music world"
-        title="Make yourself at home."
+        title="Settings"
         description="Manage your project, your email and your data."
       />
       {error && (
@@ -546,7 +519,7 @@ export function Settings({
       )}
       <div className="settings-stack">
         <section className="panel">
-          <h3>Your account</h3>
+          <h3>Account</h3>
           <p>{w.email}</p>
           <form
             key={w.profile?.display_name || "new-profile"}
@@ -609,10 +582,28 @@ export function Settings({
             </div>
             <button className="button small">Save account details</button>
           </form>
+          <button
+            className="button"
+            onClick={async () => {
+              try {
+                const r = await request<{ url: string }>("/api/auth", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ action: "logout" }),
+                });
+                window.location.href = r.url;
+              } catch (e) {
+                setError((e as Error).message);
+              }
+            }}
+          >
+            <LogOut size={13} />
+            Log out
+          </button>
         </section>
         <section className="panel settings-row">
           <div>
-            <h3>Your artist project</h3>
+            <h3>Artist Profile</h3>
             <p>
               {w.artistName} · {w.email}
             </p>
@@ -623,7 +614,7 @@ export function Settings({
         </section>
         <section className="panel settings-row">
           <div>
-            <h3>Your Gmail connection</h3>
+            <h3>Email</h3>
             <p>
               {w.gmailEmail
                 ? `Connected as ${w.gmailEmail}`
@@ -674,7 +665,7 @@ export function Settings({
           )}
         </section>
         <section className="panel">
-          <h3>Your data belongs to you.</h3>
+          <h3>Data</h3>
           <p>
             Export your contacts or your complete private workspace, including
             notes, lists, templates and email history.
@@ -689,42 +680,17 @@ export function Settings({
               Account JSON
             </a>
           </div>
-        </section>
-        <section className="panel settings-row">
-          <div>
-            <h3>Private by design</h3>
-            <p>
-              <ShieldCheck size={13} style={{ display: "inline" }} /> Your
-              contacts, notes and relationship history are yours alone.
-            </p>
-          </div>
-          <button
-            className="button"
-            onClick={async () => {
-              try {
-                const r = await request<{ url: string }>("/api/auth", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ action: "logout" }),
-                });
-                window.location.href = r.url;
-              } catch (e) {
-                setError((e as Error).message);
-              }
-            }}
-          >
-            <LogOut size={13} />
-            Log out
-          </button>
-        </section>
-        <section className="panel settings-row">
-          <div>
-            <h3>{w.demo ? "Reset demo workspace" : "Delete your account"}</h3>
-            <p>This permanently removes your private workspace data.</p>
-          </div>
-          <button className="button danger" onClick={() => setDeleting(true)}>
-            Delete data
-          </button>
+          <details className="disclosure">
+            <summary>
+              {w.demo ? "Reset demo workspace" : "Delete your account"}
+            </summary>
+            <div>
+              <p>This permanently removes your private workspace data.</p>
+            </div>
+            <button className="button danger" onClick={() => setDeleting(true)}>
+              Delete data
+            </button>
+          </details>
         </section>
       </div>
       <Dialog

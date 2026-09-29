@@ -1,8 +1,8 @@
 # Product
 
-## Current v0.9 scope
+## Current v0.9.1 scope
 
-The local beta serves independent solo artists, bands and small artist teams managing their own professional relationships. Demo data is fictional; hosted Supabase and live Gmail acceptance remain pending. UX simplification is the next planned product pass.
+The local beta serves independent solo artists, bands and small artist teams managing their own professional relationships. Demo data is fictional; hosted Supabase and live Gmail acceptance remain pending. The v0.9.1 simplification pass uses progressive disclosure without changing the underlying scope.
 
 MusicMail helps an independent musician find relevant music-industry contacts, privately organise relationships and send thoughtful outreach. Its focus is the UK independent music community.
 

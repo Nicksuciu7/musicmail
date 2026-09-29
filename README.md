@@ -6,9 +6,9 @@ MusicMail is a music-industry discovery, CRM and outreach tool built for indepen
 
 ## Current status
 
-**Current release: v0.9.0 local beta**
+**Current release: v0.9.1 local beta**
 
-The core local beta works with fictional demo data. Gmail production sending is not enabled in the demo and live OAuth/sending verification remains pending. Live Supabase verification also remains pending. Version 1.0.0 follows production infrastructure verification, security/privacy checks and final UX refinement.
+The core local beta works with fictional demo data. Version 0.9.1 simplifies discovery, navigation, contact details and workspace layouts through progressive disclosure. Gmail production sending is not enabled in the demo and live OAuth/sending verification remains pending. Live Supabase verification also remains pending. Version 1.0.0 follows production infrastructure verification, security/privacy checks and final UX refinement.
 
 ## Problem
 
@@ -130,6 +130,7 @@ Browser tests cover artist setup, Explore, a private relationship, template prev
 - [Vercel, Supabase and Google setup](docs/deployment.md)
 - [Release checklist and known limitations](docs/release-checklist.md)
 - [Recorded local verification](docs/verification.md)
+- [UX simplification: audit and before/after review](docs/ux-simplification.md)
 - [Changelog](CHANGELOG.md)
 - [GitHub repository and release procedure](docs/publishing.md)
 
@@ -137,7 +138,7 @@ Browser tests cover artist setup, Explore, a private relationship, template prev
 
 ### v0.9.x
 
-- UX simplification and production infrastructure verification.
+- Production infrastructure verification and further usability validation.
 
 ### v1.0.0
 
