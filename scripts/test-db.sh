@@ -34,4 +34,5 @@ psql -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
 psql -v ON_ERROR_STOP=1 -q -f tests/rls.sql
 psql -v ON_ERROR_STOP=1 -q -f tests/workspace-rls.sql
 psql -v ON_ERROR_STOP=1 -q -f tests/recovery-grants.sql
+psql -v ON_ERROR_STOP=1 -q -f tests/calendar-rls.sql
 printf 'Database migrations, repeatable seed and RLS integration checks passed.\n'

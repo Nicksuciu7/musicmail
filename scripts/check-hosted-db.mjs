@@ -49,7 +49,7 @@ assert.equal(
   "A public table has RLS disabled",
 );
 const privateTables =
-  "'profiles','user_preferences','workspaces','workspace_members','user_contacts','notes','interactions','lists','list_members','saved_views','email_templates','sent_emails','gmail_connections','email_send_attempts','request_buckets','recovery_grants','admin_users'";
+  "'profiles','user_preferences','workspaces','workspace_members','user_contacts','notes','interactions','lists','list_members','saved_views','email_templates','sent_emails','gmail_connections','email_send_attempts','request_buckets','recovery_grants','admin_users','calendar_events','calendar_event_items'";
 assert.equal(
   query(
     "select (has_schema_privilege('anon','public','create') or has_schema_privilege('authenticated','public','create'))::text;",

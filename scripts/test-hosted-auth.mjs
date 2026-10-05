@@ -38,7 +38,8 @@ let password = `Mm1!${randomBytes(24).toString("base64url")}`,
   step = "setup",
   browser;
 function check(r) {
-  if (r.error) throw new Error("Provider request failed");
+  if (r.error)
+    throw new Error("Provider request failed", { cause: r.error.code });
   return r.data;
 }
 try {
@@ -188,6 +189,116 @@ try {
     name: "Disposable smoke view",
     filters: { relationship: "warm" },
   });
+  step = "authenticated calendar and appearance";
+  const calendarPost = async (data) => {
+    const r = await page.request.post(origin + "/api/calendar", {
+      headers: { Origin: origin },
+      data,
+    });
+    assert.equal(r.status(), 200);
+    return r.json();
+  };
+  const calendarInput = {
+    title: "Disposable hosted calendar gig",
+    date: "2026-10-12",
+    start_time: "19:30",
+    end_time: "22:00",
+    timezone: "Europe/London",
+    location_name: "Fictional room",
+    contact_id: contactId,
+    artist_entity_id: crm.artist.id,
+    load_in_time: "17:30",
+    items: [{ label: "Martin D-28" }, { label: "mics", quantity: 2 }],
+  };
+  step = "calendar create response";
+  let calendarSaved = (
+    await calendarPost({ action: "save", event: calendarInput })
+  ).event;
+  assert.equal(calendarSaved.workspace_id, userId);
+  assert.equal(calendarSaved.items.length, 2);
+  assert.equal(calendarSaved.starts_at, "2026-10-12T18:30:00+00:00");
+  step = "calendar checklist update";
+  calendarSaved = (
+    await calendarPost({
+      action: "check",
+      id: calendarSaved.id,
+      itemId: calendarSaved.items[0].id,
+      completed: true,
+    })
+  ).event;
+  assert.equal(calendarSaved.items[0].completed, true);
+  step = "calendar edit";
+  calendarSaved = (
+    await calendarPost({
+      action: "save",
+      id: calendarSaved.id,
+      event: {
+        ...calendarInput,
+        title: "Edited hosted calendar gig",
+        items: calendarSaved.items.map((i) => ({
+          id: i.id,
+          label: i.label,
+          quantity: i.quantity,
+          completed: i.completed,
+        })),
+      },
+    })
+  ).event;
+  assert.equal(calendarSaved.title, "Edited hosted calendar gig");
+  assert.equal(calendarSaved.items[0].completed, true);
+  step = "calendar ICS";
+  const ics = await page.request.get(
+    origin + `/api/calendar/${calendarSaved.id}/export`,
+  );
+  assert.equal(ics.status(), 200);
+  assert.ok((await ics.text()).includes("DTSTART:20261012T183000Z"));
+  assert.equal(ics.headers()["cache-control"], "private, no-store");
+  assert.equal(
+    (
+      await page.request.post(origin + "/api/calendar", {
+        data: { action: "delete", id: calendarSaved.id },
+      })
+    ).status(),
+    400,
+  );
+  step = "appearance persistence";
+  await page.goto(origin + "/settings");
+  await page.getByRole("radio", { name: "Dark", exact: true }).check();
+  await page.getByRole("radio", { name: "Dark", exact: true }).waitFor();
+  await page.waitForFunction(
+    () => !document.querySelector('input[value="dark"]').disabled,
+  );
+  await page.reload();
+  assert.equal(await page.locator("html").getAttribute("data-theme"), "dark");
+  assert.equal(
+    check(
+      await admin.from("profiles").select("theme").eq("id", userId).single(),
+    ).theme,
+    "dark",
+  );
+  assert.equal(
+    (
+      await page.request.post(origin + "/api/appearance", {
+        data: { theme: "light" },
+      })
+    ).status(),
+    400,
+  );
+  step = "large calendar export fixture";
+  // Exceed the provider's default 1,000-row cap to verify complete exports.
+  const volume = Array.from({ length: 1001 }, (_, i) => ({
+    workspace_id: userId,
+    user_id: userId,
+    title: `Disposable volume calendar ${i}`,
+    start_date: "2026-10-13",
+    end_date: "2026-10-14",
+  }));
+  for (let offset = 0; offset < volume.length; offset += 100)
+    check(
+      await admin
+        .from("calendar_events")
+        .insert(volume.slice(offset, offset + 100)),
+    );
   step = "CSV import and complete private export";
   const imported = Papa.parse(
     "name,email,notes\nImported smoke,imported@example.test,Import note",
@@ -212,6 +323,16 @@ try {
   assert.equal(exportResponse.status(), 200);
   const exported = await exportResponse.json();
   assert.equal(exported.contacts.length, 2);
+  assert.equal(
+    exported.calendarEvents.length,
+    1002,
+    "Calendar full export truncated",
+  );
+  assert.equal(
+    exported.calendarEvents.find((e) => e.id === calendarSaved.id).items.length,
+    2,
+  );
+  assert.equal(exported.profile.theme, "dark");
   assert.ok(exported.contacts.some((c) => c.follow_up_at === "2026-10-10"));
   assert.ok(exported.notes.some((n) => n.body.includes("Private smoke note")));
   assert.ok(
@@ -433,6 +554,8 @@ try {
     "saved_views",
     "interactions",
     "sent_emails",
+    "calendar_events",
+    "calendar_event_items",
   ]) {
     const ownerColumn = ["workspaces", "profiles"].includes(table)
       ? "id"
@@ -445,10 +568,19 @@ try {
     assert.equal(result.count, 0, "Deleted private fixture remains");
   }
   console.log(
-    `Hosted browser Auth/CRM passed (${assertions} assertions): protected routes, signup token verification, login, cookies, contact create/edit, notes/XSS, lists/members, views, CSV import/full JSON+CSV export, request integrity, Gmail callback/disconnect boundary, logout, recovery single use/old password rejection, password change, CSP and recent-auth deletion/cleanup. SMTP delivery and real Gmail consent/send remain separate evidence.`,
+    `Hosted browser Auth/CRM/Calendar passed (${assertions} assertions): protected routes, signup token verification, login, cookies, contact create/edit, notes/XSS, lists/members, views, CSV import/full JSON+CSV export, calendar CRUD/checklists/ICS, 1,002-event complete export, persisted appearance, request integrity, Gmail callback/disconnect boundary, logout, recovery single use/old password rejection, password change, CSP and recent-auth deletion/cleanup. SMTP delivery and real Gmail consent/send remain separate evidence.`,
   );
-} catch {
+} catch (error) {
   console.error("Hosted Auth acceptance failed at: " + step);
+  const frame = String(error.stack || "")
+    .split("\n")
+    .find((line) => line.includes("test-hosted-auth.mjs:"));
+  if (frame) console.error(error.name + " " + frame.trim());
+  if (
+    typeof error.cause === "string" &&
+    /^[A-Za-z0-9_]{1,20}$/.test(error.cause)
+  )
+    console.error("Provider error code: " + error.cause);
   process.exitCode = 1;
 } finally {
   if (browser) await browser.close();
