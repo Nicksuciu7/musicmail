@@ -48,3 +48,9 @@ Optional TOTP enrollment/challenge UI is not implemented. MFA must be completed 
 ## Current acceptance
 
 See [v1 acceptance](v1-acceptance.md) for exact live results and remaining blockers. The production-only dependency audit is clean; five development findings share one currently unpatched braces advisory, assessed in [dependency-audit.md](dependency-audit.md). They do not justify a breaking framework downgrade. CAPTCHA credentials/enforcement and Gmail provider acceptance remain pending. Google identity sign-in, MFA, collaboration UI and calendars are future features rather than v1 blockers.
+
+## Calendar and appearance security
+
+Calendar events and equipment lists are private workspace records with bidirectional hosted A/B CRUD tests. Composite FKs reject cross-workspace contacts and event parents. New/changed canonical venue/current-project links must be readable and of the correct type. Workspace/actor attribution is immutable for user operations. The invoker RPC cannot take ownership from JSON and rolls back an entire edit if any checklist operation fails. API requests require verified identity, bounded input, exact origin on mutation and server rate limits. Calendar and ICS responses are private/no-store.
+
+Full JSON export includes calendar rows/items through explicit allowed fields and pages beyond the provider's row cap. Sole-workspace deletion removes events/items but preserves linked shared venue identities. Personal themes use profile RLS, never a workspace setting or service-role write. The theme cookie contains only a validated mode; SSR/CSS apply it without broadening CSP. Existing Gmail OAuth scopes remain unchanged. See [acceptance](calendar-theme-acceptance.md).

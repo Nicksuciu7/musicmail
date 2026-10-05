@@ -16,4 +16,10 @@ Lists are manual groups of private contacts; saved views retain filter state and
 
 The visual design uses warm whites, restrained greens, clear typography, dense tables, side drawers and mobile list layouts. Empty states explain the next useful action. Keyboard focus, dialog semantics, textual status labels and contrast are checked.
 
-V1 excludes inbox reading, reply detection, campaigns, tracking pixels, social feeds, events, opportunities, teams, recommendations and AI agents. Future GreenRoom work should reference the existing canonical IDs.
+V1 excludes inbox reading, reply detection, campaigns, tracking pixels, social feeds, opportunities, team invitation UI, recommendations and AI agents. Calendar is now part of the requested pre-v1 candidate. Future GreenRoom work should reference the existing canonical IDs.
+
+## Unreleased Calendar and appearance
+
+Calendar answers where to be, when and what to bring. Upcoming is primary; a Monday-start Month view is optional. Required fields stay Title and Date. Gig logistics and data links are disclosures, arbitrary equipment stays a checklist, and Home adds only three next events. Google Calendar/ICS exports make deliberate copies without requesting provider access. Calendar data belongs to the workspace and uses the same private membership controls as CRM. No shared entity is created from typed text.
+
+Settings offers System/Light/Dark appearance as a personal preference, with deliberate palettes across the existing app. This pass adds no automatic sync, recurrence engine, band invitations or external dashboard configuration. See [Calendar](calendar.md) and [Appearance](themes.md).

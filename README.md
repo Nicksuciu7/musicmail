@@ -12,6 +12,8 @@ MusicMail is a music-industry discovery, CRM and outreach tool built for indepen
 
 The published release remains 0.9.1. The production foundation candidate is deployed at [musicmail.vercel.app](https://musicmail.vercel.app), with Supabase Auth, verified Resend SMTP, workspace RLS, secure password recovery/change, export and deletion. Automated production Auth/CRM smoke and hosted isolation pass. CAPTCHA activation and live Gmail setup/acceptance remain v1 blockers; the operator confirmed Google Cloud has not yet been set up. The local demo retains fictional data and cannot send email. See the [current acceptance report](docs/v1-acceptance.md).
 
+Calendar and System/Light/Dark appearance are completed on the unreleased `feature/calendar-dark-mode` branch. Hosted migrations 019–020 are installed; production UI remains the previous foundation candidate. See [Calendar](docs/calendar.md), [Appearance](docs/themes.md), and [feature acceptance](docs/calendar-theme-acceptance.md).
+
 ## Problem
 
 A musician’s professional network is scattered across spreadsheets, Gmail, Notion, social media, submission platforms and personal notes. MusicMail brings together who someone is, the music they work with, how to approach them and what happened last time.
@@ -25,6 +27,8 @@ CRM screenshots show synthetic contacts from the local demo. [Production sign-in
 ![Explore music contacts](docs/screenshots/explore-desktop.png)
 
 [My Network](docs/screenshots/network-desktop.png) · [Contact detail](docs/screenshots/contact-drawer.png) · [Email preview](docs/screenshots/email-composer.png) · [Mobile Explore](docs/screenshots/explore-mobile.png)
+
+[Calendar in Light](docs/screenshots/calendar-light-desktop.png) · [Calendar in Dark](docs/screenshots/calendar-dark-desktop.png) · [Equipment checklist](docs/screenshots/calendar-detail-light.png) · [Mobile Calendar](docs/screenshots/calendar-dark-mobile.png)
 
 ## Local development
 
@@ -55,6 +59,8 @@ For real authentication and durable storage, follow [development setup](docs/dev
 - Edit templates, personalise and preview individual messages for up to ten contacts.
 - Connect Gmail in a configured Supabase environment; send separate messages, with encrypted tokens, suppression checks and durable send records.
 - See follow-ups, recent contacts, recent mail and saved views on Home.
+- Plan workspace gigs/rehearsals and other events with an equipment checklist, Upcoming/Month views, and Google Calendar/ICS copies.
+- Choose System, Light or Dark appearance in Settings, persisted per authenticated person.
 - Maintain shared data through a restricted internal admin screen.
 
 No inbox synchronisation, reply detection, tracking pixels, campaigns, social feed or speculative GreenRoom features.

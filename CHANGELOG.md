@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased — Production foundation
+## Unreleased — Calendar, appearance and production foundation
+
+### Added
+
+- Workspace calendar with Upcoming and Monday-start Month views, quick gig planning and Home next-up events.
+- Private equipment checklists, optional canonical venue/private contact/current artist links, and atomic event editing.
+- Google Calendar prefill and standards-compliant ICS export without new OAuth permissions.
+- System/Light/Dark appearance, server-rendered without a theme flash, with per-user profile persistence.
+- Calendar migrations 019–020, complete calendar account export/deletion, A/B isolation and theme/accessibility checks.
+
+### Production foundation
 
 - Supabase email/password Auth with verified-email access, strong password policy, explicit confirmation, recovery, current-password change and secure SSR cookies.
 - Workspace ownership/backfill and membership RLS; explicit private grants, server-only rate buckets and single-use recovery grants in migrations 014–018.

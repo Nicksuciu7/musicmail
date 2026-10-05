@@ -66,3 +66,7 @@ Tests now include beta-data backfill, A/B isolation in both directions across ev
 Migration 016 adds `request_buckets` and a service-only atomic limit RPC; authenticated/anonymous clients cannot read or reset buckets. Migration 017 fills the profile/workspace display name from Auth signup metadata without trusting metadata for authorization. Limits store HMAC subject digests rather than emails or IP addresses.
 
 Migration 018 adds service-only `recovery_grants` and atomic `consume_recovery_grant` for default-template password recovery. Hosted SQL checks passed for wrong-user rejection, single use, expiry and denied authenticated grants.
+
+## Calendar / appearance migrations 019–020
+
+Additive migrations 202610050019_calendar and 202610050020_appearance are installed on the hosted project and recorded in its ledger. The existing 001–018 migrations were preserved. Events/items have membership RLS, limited grants, actor/workspace guards, composite parent/contact FKs, indexed date/parent access and deletion cascades. Optional entity links are validated through caller RLS. save_calendar_event is security invoker and atomic; no security-definer calendar write bypass exists. profiles.theme is constrained to system/light/dark, defaults to system, and uses the existing per-person profile RLS. See [calendar model](calendar.md), [appearance](themes.md) and [acceptance](calendar-theme-acceptance.md).

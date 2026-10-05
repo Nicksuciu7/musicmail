@@ -86,3 +86,9 @@ Onboarding artist name is the only required artist field. Public catalogue filte
 Migrations 014–018 add workspace membership ownership, explicit hosted privileges, durable request-limit buckets and idempotent signup profile provisioning. `user_id` on CRM rows is retained as actor attribution; `workspace_id` plus RLS membership governs access. Individual profile/preferences and Gmail connections remain user-bound. The current UI uses the personal workspace; there is no team invitation/switching interface.
 
 All Auth calls occur on the server with `@supabase/ssr`; the browser uses same-origin JSON endpoints. Proxy refreshes verified session claims, while pages and APIs use `getUser` for authorization. `getSession` is not trusted as identity. Passwords go only to Supabase Auth. Email recovery proofs are redeemed with explicit `recovery` purpose immediately before password update; ordinary login callbacks cannot authorize a reset. See [authentication.md](authentication.md).
+
+## Calendar and personal appearance (unreleased)
+
+Workspace → calendar_events → calendar_event_items uses membership RLS and composite parent/contact relationships. UTC instants plus IANA zones represent timed events; date ranges represent all-day events. A security-invoker RPC saves event/checklist atomically. Canonical venue links do not copy or publish entities. Server adapters provide the same interface for Supabase and explicit local demo. `CalendarExportProvider` separates manual external copies from future consented sync; MusicMail remains source of truth and Gmail scopes are unchanged.
+
+Personal appearance lives in profiles.theme and is read in the root server layout before rendering. Semantic CSS variables and a System media query implement both palettes; the client starts from the same preference. See [Calendar](calendar.md) and [themes](themes.md).

@@ -1,10 +1,10 @@
 # MusicMail v1.0.0 release gates
 
-Updated 2026-10-03. Published version remains 0.9.1. See [current acceptance and evidence](v1-acceptance.md).
+Updated 2026-10-05. Published version remains 0.9.1. See [current acceptance and evidence](v1-acceptance.md).
 
 ## Completed candidate gates
 
-- [x] Hosted migrations 001–018, ownership backfill, membership RLS and private grants reviewed.
+- [x] Hosted migrations 001–020, ownership backfill, membership RLS and private grants reviewed.
 - [x] Supabase password policy, verified-email access and secure Auth/recovery/change flows.
 - [x] Resend SMTP, verified auth.musicmailapp.uk sender, branded templates and inbox confirmation/reset completion.
 - [x] HTTPS candidate deployed with demo disabled, private server secrets and exact Site URL/redirects.
@@ -14,13 +14,22 @@ Updated 2026-10-03. Published version remains 0.9.1. See [current acceptance and
 - [x] Full local suite, hosted schema/grants, dependency review and browser/repository/history secret scans.
 - [x] Current documentation and anonymous Auth screenshots updated.
 
+## Calendar / appearance feature gates
+
+- [x] Upcoming/Month, quick gig details, equipment checklist, Home integration, external Google/ICS copies, mobile/demo support.
+- [x] Calendar workspace RLS, linked-record integrity, full export/deletion, hosted A/B and local PostgreSQL checks.
+- [x] Personal System/Light/Dark preference with SSR/CSS initial appearance and both-theme accessibility checks.
+- [ ] Merge/review and deploy the completed feature branch as part of the final production candidate, then rerun release acceptance.
+
+See [feature acceptance](calendar-theme-acceptance.md); no v1 publication is authorized by this feature pass.
+
 ## Genuine blockers
 
 - [ ] Turnstile widget credentials, public site key in Vercel, secret/enforcement in Supabase, redeployment and live missing/invalid/successful challenge checks.
 - [ ] Gmail Google Cloud client/API setup, Vercel server credentials and exact callback; human consent plus controlled production send/refresh/disconnect acceptance.
 - [ ] Final changed-provider/release-candidate acceptance and scan after these configuration changes.
 
-Google identity login, MFA, collaboration UI and calendars are optional. The reviewed development-only braces advisory is non-blocking; production dependencies are clean. DMARC monitoring policy is valid; stronger enforcement and backup/monitoring rehearsals are hardening. See [classification](v1-acceptance.md#outstanding-classification).
+Google identity login, MFA, collaboration UI and automatic external calendar sync are optional. The requested internal Calendar/manual exports and appearance features are now implemented on the feature branch; merge/deployment and final candidate acceptance remain required before v1. The reviewed development-only braces advisory is non-blocking; production dependencies are clean. DMARC monitoring policy is valid; stronger enforcement and backup/monitoring rehearsals are hardening. See [classification](v1-acceptance.md#outstanding-classification).
 
 ## Authorized publication only after blockers clear
 
