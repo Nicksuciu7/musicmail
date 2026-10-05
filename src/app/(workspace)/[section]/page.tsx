@@ -12,6 +12,7 @@ export default async function Page({
       "home",
       "explore",
       "network",
+      "calendar",
       "lists",
       "mail",
       "templates",

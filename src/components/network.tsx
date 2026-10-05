@@ -276,7 +276,7 @@ export function Network({
         </div>
       )}
       {loading ? (
-        <div aria-busy="true" aria-label="Loading contacts">
+        <div role="status" aria-busy="true" aria-label="Loading contacts">
           <div className="skeleton" />
           <div className="skeleton" />
         </div>

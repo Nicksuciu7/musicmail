@@ -47,7 +47,7 @@ export function Captcha({ onToken }: { onToken: (token: string) => void }) {
           onToken("");
         }}
       />
-      <div ref={ref} aria-label="Security verification" />
+      <div ref={ref} role="group" aria-label="Security verification" />
       {failed && (
         <p role="alert">
           Security verification could not finish. Reload this page and try

@@ -7,7 +7,7 @@ export function Brand() {
       <span className="brand-mark">
         <Music2 size={19} />
       </span>
-      MusicMail<span style={{ color: "#5a634f", fontSize: 20 }}>.</span>
+      MusicMail<span style={{ color: "var(--muted)", fontSize: 20 }}>.</span>
     </div>
   );
 }

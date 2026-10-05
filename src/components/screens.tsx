@@ -1,4 +1,6 @@
 "use client";
+import { Appearance } from "./theme-provider";
+import { NextUp } from "./calendar";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -81,6 +83,7 @@ export function Home({
           <Link href="/onboarding">Set up your artist profile →</Link>
         </p>
       )}
+      <NextUp w={w} />
       <div className="attention-grid">
         <div className="attention-stack">
           <section className="panel">
@@ -518,6 +521,7 @@ export function Settings({
         </div>
       )}
       <div className="settings-stack">
+        <Appearance />
         <section className="panel">
           <h3>Account</h3>
           <p>{w.email}</p>

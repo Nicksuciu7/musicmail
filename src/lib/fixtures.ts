@@ -1,3 +1,5 @@
+import { normaliseEvent, todayIn } from "./calendar";
+import { Temporal } from "@js-temporal/polyfill";
 import type { Entity, Template, Workspace } from "./domain";
 export const genres = [
   "Folk",
@@ -323,6 +325,32 @@ for (const [name, category] of [
   });
 export function demoWorkspace(): Workspace {
   return {
+    calendarEvents: ["The Lantern Room", "Eastside Rehearsal"].map(
+      (title, i) => {
+        const date = Temporal.PlainDate.from(todayIn("Europe/London"))
+          .add({ days: i ? 10 : 7 })
+          .toString();
+        const id = `30000000-0000-4000-8000-00000000000${i}`;
+        const now = new Date().toISOString();
+        return {
+          ...normaliseEvent({
+            title,
+            date,
+            event_type: i ? "Rehearsal" : "Gig",
+            start_time: i ? "18:00" : "19:30",
+            location_name: i
+              ? "Eastside Studio (fictional)"
+              : "Lantern Room (fictional)",
+            notes: "Fictional demo event.",
+          }).event,
+          id,
+          workspace_id: "00000000-0000-4000-8000-000000000000",
+          created_at: now,
+          updated_at: now,
+          items: [],
+        };
+      },
+    ),
     demo: true,
     email: "Demo workspace",
     artistName: "Your artist project",

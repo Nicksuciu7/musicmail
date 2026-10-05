@@ -11,6 +11,20 @@ import {
   type Workspace,
 } from "../domain";
 const directory = join(process.cwd(), ".data", "demo");
+function calendarOwnership(w: Workspace, id: string) {
+  w.calendarEvents = (w.calendarEvents || []).map((e) => ({
+    ...e,
+    workspace_id: id,
+    user_id: e.user_id || id,
+    items: e.items.map((i) => ({
+      ...i,
+      workspace_id: id,
+      event_id: e.id,
+      user_id: i.user_id || id,
+    })),
+  }));
+  return w;
+}
 export function readDemo(id: string): Workspace {
   try {
     const state = JSON.parse(
@@ -20,9 +34,10 @@ export function readDemo(id: string): Workspace {
       ...c,
       entity: entities.find((e) => e.id === c.entity_id),
     }));
-    return state;
+    state.calendarEvents ??= demoWorkspace().calendarEvents;
+    return calendarOwnership(state, id);
   } catch {
-    return demoWorkspace();
+    return calendarOwnership(demoWorkspace(), id);
   }
 }
 export function writeDemo(id: string, w: Workspace) {

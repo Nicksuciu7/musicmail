@@ -108,6 +108,7 @@ export function Onboarding() {
         </Link>
         <div
           className="step-indicator"
+          role="group"
           aria-label={`Step ${step + 1} of ${titles.length}`}
         >
           {titles.map((_, i) => (

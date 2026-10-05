@@ -1,4 +1,7 @@
 import "server-only";
+import { calendarEvents } from "./calendar";
+import { todayIn } from "../calendar";
+import { Temporal } from "@js-temporal/polyfill";
 import { rateLimit } from "./rate-limit";
 import { checked, identity, supabase, serviceClient } from "./supabase";
 import { readDemo, mutateDemo } from "./demo";
@@ -75,6 +78,20 @@ export async function workspace(
   );
   return {
     ...document,
+    calendarEvents: await calendarEvents(
+      full
+        ? undefined
+        : {
+            from: todayIn(document.profile?.timezone || "Europe/London"),
+            to: Temporal.PlainDate.from(
+              todayIn(document.profile?.timezone || "Europe/London"),
+            )
+              .add({ days: 365 })
+              .toString(),
+            timezone: document.profile?.timezone || "Europe/London",
+            offset: 0,
+          },
+    ),
     demo: false,
     email: user.email,
     gmailEmail: connection?.email || null,

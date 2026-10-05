@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Home as HomeIcon,
   Compass,
+  CalendarDays,
   Users,
   Folder,
   Mail,
@@ -42,11 +43,13 @@ import {
   RecipientPicker,
 } from "./screens";
 import { Dialog } from "./ui/dialog";
+import { Calendar } from "./calendar";
 import { Admin } from "./admin";
 const nav = [
   ["home", "Home", HomeIcon],
   ["explore", "Explore", Compass],
   ["network", "My Network", Users],
+  ["calendar", "Calendar", CalendarDays],
   ["lists", "Lists", Folder],
   ["mail", "Mail", Mail],
 ] as const;
@@ -233,8 +236,8 @@ export function Workspace({ page }: { page: string }) {
               <Menu size={19} />
             </button>
             <span>Your workspace</span>
-            <span style={{ color: "#5e6158" }}>/</span>
-            <strong style={{ fontWeight: 500, color: "#5a664f" }}>
+            <span style={{ color: "var(--muted)" }}>/</span>
+            <strong style={{ fontWeight: 500, color: "var(--muted)" }}>
               {nav.find((n) => n[0] === page)?.[1] ||
                 (page === "templates"
                   ? "Mail"
@@ -347,6 +350,7 @@ export function Workspace({ page }: { page: string }) {
                   onCompose={() => setPicker(true)}
                 />
               )}
+              {page === "calendar" && <Calendar w={w} />}
               {page === "lists" && (
                 <Lists
                   w={w}

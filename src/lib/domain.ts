@@ -1,3 +1,4 @@
+import type { CalendarEvent } from "./calendar";
 import { z } from "zod";
 import { expandGenres, genreParents } from "./taxonomy";
 export const relationships = [
@@ -134,8 +135,10 @@ export type SentEmail = {
   gmail_message_id?: string;
 };
 export type Workspace = {
+  calendarEvents?: CalendarEvent[];
   profile?: {
     display_name: string | null;
+    theme?: "system" | "light" | "dark";
     timezone: string;
     country: string | null;
   } | null;

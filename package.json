@@ -19,6 +19,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "@radix-ui/react-dialog": "^1.1.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.0.0",
@@ -45,6 +46,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
+    "ical.js": "^2.2.1",
     "jsdom": "^29.1.1",
     "prettier": "^3.0.0",
     "tailwindcss": "^4.0.0",

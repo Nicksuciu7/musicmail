@@ -95,7 +95,7 @@ export function Explore({
         </button>
       </div>
       {loading ? (
-        <div aria-label="Loading connections" aria-busy="true">
+        <div role="status" aria-label="Loading connections" aria-busy="true">
           {[1, 2, 3, 4].map((i) => (
             <div className="skeleton" key={i} />
           ))}
