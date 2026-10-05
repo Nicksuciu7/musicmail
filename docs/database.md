@@ -10,6 +10,7 @@ PostgreSQL migrations in `supabase/migrations/` are the schema source of truth. 
 | Geography                   | locations, entity_locations                                        |
 | Music                       | genres, entity_genres, emotion_families, emotions, entity_emotions |
 | Public contact / provenance | entity_contact_methods, submission_channels, entity_sources        |
+| Workspace access            | workspaces, workspace_members                                      |
 | Owner identity              | profiles, user_preferences                                         |
 | CRM                         | user_contacts, notes, interactions                                 |
 | Organisation                | lists, list_members, saved_views                                   |
@@ -20,9 +21,9 @@ See [the ER diagram](architecture.md#entity-diagram). The SQL files document eve
 
 `entities.id` is the canonical UUID. Subtypes have a primary-key foreign key to it; triggers reject a mismatched entity type and prevent later type changes. Genre/emotion links have composite uniqueness. Entity roles are many-to-many and may include an organisation and dates. Artist projects are distinct from the people involved.
 
-`user_contacts(user_id,id)` and `lists(user_id,id)` have composite unique keys. Notes, history, sent messages and list memberships reference those pairs, making cross-owner attachment impossible even if a client supplies another user's UUID. Linked shared contacts are unique per user and entity. Private contacts require a name and have no shared entity.
+`user_contacts(workspace_id,id)` and `lists(workspace_id,id)` have composite unique keys after migration 014. Notes, history, sent messages and list memberships reference those pairs, preventing cross-workspace attachment even with a guessed UUID. Linked shared contacts are unique per workspace and entity. `user_id` remains a nullable creator/actor audit field; membership governs access. Private contacts require a name and have no shared entity.
 
-The public directory is readable to authenticated users. Private artists are visible to their creator and administrators; CRM notes and history remain owner-only even for administrators. Archived public entities leave Explore but remain readable to existing contact owners. A confirmed merge preserves aliases, music metadata, sources, contact methods, submission channels and graph edges. Old IDs remain archived with `merged_into_id`; conflicting private overlays remain archived rather than silently overwriting someone's notes or statuses.
+The public directory is readable to authenticated users. Private artists are visible to their creator and administrators; CRM notes and history require workspace membership even for administrators. Archived public entities leave Explore but remain readable to existing contact owners. A confirmed merge preserves aliases, music metadata, sources, contact methods, submission channels and graph edges. Old IDs remain archived with `merged_into_id`; conflicting private overlays remain archived rather than silently overwriting someone's notes or statuses.
 
 ## Functions
 
@@ -49,3 +50,19 @@ Do not apply synthetic entity rows to a live industry catalogue without clearly 
 `npm run test:db` tests migrations, repeatable seeds, cross-user visibility and writes, private artist creation, imports, lists, views, email metadata, send replay protection, suppression, admin separation, merges and deletion in real PostgreSQL.
 
 The suite shims `auth.users` and `auth.uid()`; it is not a replacement for testing the deployed Supabase Auth/API configuration. The directory and network result queries are paginated. The initial workspace loads at most 50 recent contacts, 50 due follow-ups and 50 upcoming follow-ups, plus explicitly requested detail contacts. Private notes load on demand; mail and network search paginate independently. Explicit exports use the complete owner-only aggregate. No full shared catalogue is shipped to the browser.
+
+## Workspace migration 014 (hosted)
+
+`202609290014_workspace_ownership.sql` creates workspaces and server-managed owner/member memberships, backfills every existing Auth user, and provisions a personal workspace/profile on new Auth users. Personal workspace IDs currently equal their user's ID; future team workspaces can use independent UUIDs. The interface continues to use the personal workspace; invitations and switching are not implemented.
+
+Private tables gain `workspace_id`. Existing `user_id` fields retain creator/actor attribution and use `ON DELETE SET NULL`; they no longer govern CRM RLS. Tenant and actor fields cannot be reassigned by authenticated updates. Composite workspace foreign keys prevent cross-workspace parent links. Read aggregates obey membership RLS, so exports can include all workspaces the actor belongs to. Profile/preferences and Gmail credentials remain individual-user data.
+
+The migration updates history, import duplicate detection, merges and service send operations. Onboarding serializes concurrent requests per user and preserves the existing artist ID. Hosted default grants are explicitly revoked for anonymous tables, credential tables and application RPCs, then required access is restored.
+
+Deleting the sole member removes the workspace and its CRM. Deleting the last owner while other members remain is blocked. With another owner present, membership and creator attribution are removed while workspace data remains. Private canonical artists created by the deleted user are removed; public entities remain with null creator attribution. Application recent-auth/current-password proof and hosted deletion/cleanup tests are implemented and verified.
+
+Tests now include beta-data backfill, A/B isolation in both directions across every private CRM table, shared entities, workspace/parent tampering, membership escalation, revocation, service RPC restrictions, default privilege hardening and deletion preservation. They run against a local PostgreSQL Auth shim; hosted API and Auth tests remain required. Migrations 001–018 are now installed on the hosted project. The hosted isolation script passed 106 assertions again on 2026-10-03; production Auth/CRM browser smoke passed 68 assertions. Read-only checks confirm all 18 migration versions match and public-table RLS/grants are correct. See [acceptance](v1-acceptance.md). Migration 015 also revokes inherited TRUNCATE/REFERENCES/TRIGGER grants on all public tables and tightens future default privileges.
+
+Migration 016 adds `request_buckets` and a service-only atomic limit RPC; authenticated/anonymous clients cannot read or reset buckets. Migration 017 fills the profile/workspace display name from Auth signup metadata without trusting metadata for authorization. Limits store HMAC subject digests rather than emails or IP addresses.
+
+Migration 018 adds service-only `recovery_grants` and atomic `consume_recovery_grant` for default-template password recovery. Hosted SQL checks passed for wrong-user rejection, single use, expiry and denied authenticated grants.

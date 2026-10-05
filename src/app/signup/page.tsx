@@ -2,5 +2,11 @@ import { AuthForm } from "@/components/auth-form";
 import { demoEnabled } from "@/lib/server/supabase";
 export const dynamic = "force-dynamic";
 export default function Page() {
-  return <AuthForm signup demo={demoEnabled()} />;
+  return (
+    <AuthForm
+      signup
+      demo={demoEnabled()}
+      googleEnabled={process.env.GOOGLE_AUTH_ENABLED === "true"}
+    />
+  );
 }

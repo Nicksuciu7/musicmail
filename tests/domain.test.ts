@@ -1,4 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+// Vitest runs server crypto tests outside Next.js's react-server resolver.
+vi.mock("server-only", () => ({}));
 import {
   filterSchema,
   serializeFilters,

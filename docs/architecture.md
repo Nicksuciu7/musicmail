@@ -1,6 +1,8 @@
 # MusicMail architecture review
 
-Status: implementation baseline, 0.1.0. The repository started empty, with no remote. No change to the specified entity architecture is needed.
+> v1 foundation is in progress. See [current status and migration handoff](v1-progress.md) and [workspace migration details](database.md#workspace-migration-014-hosted). Hosted database/isolation and core Auth browser checks pass; production acceptance is incomplete. The published release remains v0.9.1.
+
+Current foundation: 0.9.1 working tree, deployed for v1 acceptance; [current results](v1-acceptance.md). Canonical identity and workspace overlays remain the specified architecture.
 
 ## Decisions
 
@@ -55,7 +57,7 @@ Route handlers call the domain repository for catalogue queries, CRM operations,
 
 ## RLS plan
 
-Enable RLS on every public table. Shared rows are readable only when their parent entity is public and unarchived, or owned by the current user, or the user is an admin. Shared mutations are admin-only, except a narrowly scoped transactional onboarding function. Private rows require `auth.uid() = user_id` in both USING and WITH CHECK. Composite foreign keys prevent attaching notes, history or list memberships to another user's contact/list. Token and attempt tables have no authenticated grants; service-role access is restricted to Gmail routes after authentication. Admin membership cannot be self-assigned.
+Enable RLS on every public table. Shared rows are readable only when their parent entity is public and unarchived, or owned by the current user, or the user is an admin. Shared mutations are admin-only, except a narrowly scoped transactional onboarding function. Private CRM rows require workspace membership in both USING and WITH CHECK; profiles/preferences remain user-bound. Composite foreign keys prevent attaching notes, history or list memberships to another user's contact/list. Token and attempt tables have no authenticated grants; service-role access is restricted to Gmail routes after authentication. Admin membership cannot be self-assigned.
 
 ## Gmail architecture
 
@@ -73,8 +75,14 @@ Explicit separate consent using gmail.send and identity email scopes; state is r
 
 ## Git and release plan
 
-Retain existing main branch and any remote; incremental conventional commits. Annotated milestone tags only after checks. Keep version below 1.0.0 until live OAuth, production deployment and all release criteria pass. Never commit environment secrets, browser profiles or private datasets. No remote or hosted credentials were present at inspection.
+Retain existing main branch and any remote; incremental conventional commits. Annotated milestone tags only after checks. Keep version below 1.0.0 until live OAuth, production deployment and all release criteria pass. Never commit environment secrets, browser profiles or private datasets. The existing GitHub remote and beta tags are preserved; hosted secrets remain private.
 
 ## Clarifications
 
 Onboarding artist name is the only required artist field. Public catalogue filters do not reveal private artists. Gmail sender identity is independent of the login email. Demo entities are fictional, with reserved .example addresses; no fabricated contacts are represented as genuine industry data. No Microsoft integration, password-only local auth, inbox sync or later GreenRoom features are added.
+
+## v1 Auth and workspace additions
+
+Migrations 014–018 add workspace membership ownership, explicit hosted privileges, durable request-limit buckets and idempotent signup profile provisioning. `user_id` on CRM rows is retained as actor attribution; `workspace_id` plus RLS membership governs access. Individual profile/preferences and Gmail connections remain user-bound. The current UI uses the personal workspace; there is no team invitation/switching interface.
+
+All Auth calls occur on the server with `@supabase/ssr`; the browser uses same-origin JSON endpoints. Proxy refreshes verified session claims, while pages and APIs use `getUser` for authorization. `getSession` is not trusted as identity. Passwords go only to Supabase Auth. Email recovery proofs are redeemed with explicit `recovery` purpose immediately before password update; ordinary login callbacks cannot authorize a reset. See [authentication.md](authentication.md).

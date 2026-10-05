@@ -14,11 +14,24 @@ create role service_role nologin bypassrls;
 create schema auth;
 create table auth.users(id uuid primary key,email text);
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
-grant usage on schema auth,public to authenticated,service_role;
-grant execute on function auth.uid() to authenticated,service_role;
+grant usage on schema auth,public to anon,authenticated,service_role;
+grant execute on function auth.uid() to anon,authenticated,service_role;
+-- Model permissive hosted defaults: the final migration must revoke them.
+alter default privileges in schema public grant all on tables to anon,authenticated,service_role;
+alter default privileges in schema public grant execute on functions to anon,authenticated,service_role;
 SQL
-for migration in supabase/migrations/*.sql; do psql -v ON_ERROR_STOP=1 -q -f "$migration"; done
+for migration in supabase/migrations/*.sql; do
+  if [[ "$migration" == *202609290014_workspace_ownership.sql ]]; then
+    psql -v ON_ERROR_STOP=1 -q -f tests/workspace-upgrade-before.sql
+  fi
+  psql -v ON_ERROR_STOP=1 -q -f "$migration"
+  if [[ "$migration" == *202609290014_workspace_ownership.sql ]]; then
+    psql -v ON_ERROR_STOP=1 -q -f tests/workspace-upgrade-after.sql
+  fi
+done
 psql -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
 psql -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
 psql -v ON_ERROR_STOP=1 -q -f tests/rls.sql
+psql -v ON_ERROR_STOP=1 -q -f tests/workspace-rls.sql
+psql -v ON_ERROR_STOP=1 -q -f tests/recovery-grants.sql
 printf 'Database migrations, repeatable seed and RLS integration checks passed.\n'

@@ -521,6 +521,11 @@ export function Settings({
         <section className="panel">
           <h3>Account</h3>
           <p>{w.email}</p>
+          {!w.demo && (
+            <Link className="button" href="/change-password">
+              Change password
+            </Link>
+          )}
           <form
             key={w.profile?.display_name || "new-profile"}
             onSubmit={async (e) => {
@@ -697,7 +702,7 @@ export function Settings({
         open={deleting}
         onOpenChange={setDeleting}
         title="Delete your workspace?"
-        description="This cannot be undone. Download an export first if you want to keep your data."
+        description="This cannot be undone. Export first. For a real account, sign out and sign back in within five minutes before deleting."
       >
         <label className="field">
           Type DELETE to confirm

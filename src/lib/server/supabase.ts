@@ -2,7 +2,9 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-export const demoEnabled = () => process.env.MUSICMAIL_DEMO === "true";
+import { localDemo, sessionCookieOptions } from "./config";
+import { ApiError } from "./http";
+export const demoEnabled = localDemo;
 export async function supabase() {
   const jar = await cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -12,6 +14,7 @@ export async function supabase() {
       "Supabase is not configured. Follow the local setup in README.",
     );
   return createServerClient(url, key, {
+    cookieOptions: sessionCookieOptions(),
     cookies: {
       getAll: () => jar.getAll(),
       setAll: (items) => {
@@ -53,7 +56,11 @@ export async function identity() {
   }
   const db = await supabase();
   const { data, error } = await db.auth.getUser();
-  if (error || !data.user) throw new Error("Please sign in to continue.");
+  if (error || !data.user || !data.user.email_confirmed_at)
+    throw new ApiError(
+      "Please sign in with a verified account to continue.",
+      401,
+    );
   return { id: data.user.id, email: data.user.email || "", demo: false };
 }
 export function checked<T>(r: {

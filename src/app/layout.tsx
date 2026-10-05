@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import "./globals.css";
 export const metadata: Metadata = {
@@ -5,11 +6,12 @@ export const metadata: Metadata = {
   description:
     "Discover the music industry. Build meaningful relationships. Make your next move.",
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await connection();
   return (
     <html lang="en">
       <body>{children}</body>

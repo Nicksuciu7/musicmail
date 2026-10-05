@@ -11,6 +11,11 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:db": "bash scripts/test-db.sh",
+    "test:hosted:isolation": "node --env-file=.env.local scripts/test-hosted-isolation.mjs",
+    "test:hosted:auth": "node --env-file=.env.local scripts/test-hosted-auth.mjs",
+    "check:hosted-db": "node --env-file=.env.local scripts/check-hosted-db.mjs",
+    "check:secrets": "node --env-file=.env.local scripts/check-secrets.mjs",
+    "check:dependencies": "node scripts/check-dependencies.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

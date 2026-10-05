@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <body>
+    <h1>Reset your MusicMail password</h1>
+    <p>Use this one-time link to choose a new password.</p>
+    <p>
+      <a href="{{ .SiteURL }}/reset-password#token_hash={{ .TokenHash }}"
+        >Reset password</a
+      >
+    </p>
+    <p>
+      If you did not request a reset, ignore this email. Your password will stay
+      the same.
+    </p>
+  </body>
+</html>

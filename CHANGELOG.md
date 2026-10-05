@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased — Production foundation
+
+- Supabase email/password Auth with verified-email access, strong password policy, explicit confirmation, recovery, current-password change and secure SSR cookies.
+- Workspace ownership/backfill and membership RLS; explicit private grants, server-only rate buckets and single-use recovery grants in migrations 014–018.
+- Turnstile component/provider integration with missing/invalid-token regression coverage; external activation remains pending.
+- Production Resend SMTP and branded confirmation/recovery links; bounded `pkce_` token format support without weakening purpose or single-use checks.
+- Complete private JSON export with explicit field filtering, CSV formula protection, recent-auth account deletion and verified cleanup.
+- Nonce CSP, production-safe redirects, request bounds, origin checks, privacy-safe logs and Gmail security regression coverage.
+- Hosted Auth/CRM smoke, A/B isolation, read-only migration/grant checks and repository/history/local/deployed browser secret scans.
+
+Production deployment is available for acceptance. Gmail provider setup and CAPTCHA activation are still release blockers; version remains 0.9.1 and no v1 tag/release has been created.
+
 ## [0.9.1] — 2026-09-29 — UX simplification
 
 ### Changed

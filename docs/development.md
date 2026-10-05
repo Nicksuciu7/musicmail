@@ -1,5 +1,7 @@
 # Development
 
+> v1 foundation is in progress. See [current status and migration handoff](v1-progress.md) and [workspace migration details](database.md#workspace-migration-014-local-work-in-progress). Hosted database/isolation and core Auth browser checks pass; production acceptance is incomplete. The published release remains v0.9.1.
+
 ## Local demonstration
 
 Use Node 22.12+ with npm. Install with `npm ci`, copy `.env.example` to `.env.local`, then `npm run dev`. Open http://localhost:3000. Use `MUSICMAIL_DEMO=true` only for synthetic local demonstration. Browser sessions are independent; closing a tab does not delete its data. Settings → Delete data resets that demo workspace.
@@ -53,3 +55,9 @@ Formatting: `npm run format`. Regenerate SQL seed from the typed synthetic fixtu
 `src/lib/domain.ts` contains DTOs, validated actions and pure helpers. `src/lib/server` owns authentication, repositories, demo persistence, encryption and Gmail. API routes validate requests and call services. `src/components` contains the workspace screens and shared interactions. `supabase/migrations` is authoritative for persistence and access policy.
 
 The local beta deliberately uses a small number of straightforward services rather than a speculative framework. The workspace bootstrap is bounded; contact details load on demand. Directory, network and mail queries paginate on the server. Full exports and duplicate validation use complete owner-scoped data separately.
+
+## Explicit hosted isolation check
+
+After reviewed migrations are installed in a dedicated project, run `node --env-file=.env.local scripts/test-hosted-isolation.mjs`. This is an opt-in acceptance check, not part of CI: it creates two disposable `.test` Auth users and one clearly labelled test entity, exercises real authenticated Data API isolation, and removes fixtures in `finally`. It never sends email. Do not interrupt cleanup; if a network failure prevents removal, inspect the labelled test fixtures. It requires the existing public and server API keys; it never prints their values or test passwords.
+
+For live Auth browser acceptance, run the built application with `MUSICMAIL_DEMO=false npm start`, then `node --env-file=.env.local scripts/test-hosted-auth.mjs`. Stop it and restore the normal demo server afterward. The script uses disposable `.test` accounts and admin-generated email tokens: it verifies application redemption and sessions, not SMTP delivery or personal Google login. No test passwords or tokens are printed or persisted to fixtures.

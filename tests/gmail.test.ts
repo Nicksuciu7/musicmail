@@ -7,6 +7,9 @@ const mocks = vi.hoisted(() => ({
   workspace: vi.fn(),
   rpc: vi.fn(),
   from: vi.fn(),
+  tokens: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
 }));
 vi.mock("../src/lib/server/supabase", () => ({
   identity: mocks.identity,
@@ -17,7 +20,13 @@ vi.mock("../src/lib/server/supabase", () => ({
   },
 }));
 vi.mock("../src/lib/server/repository", () => ({ workspace: mocks.workspace }));
-import { mimeMessage, sendSchema, sendMessages } from "../src/lib/server/gmail";
+import {
+  mimeMessage,
+  sendSchema,
+  sendMessages,
+  disconnect,
+  exchangeCode,
+} from "../src/lib/server/gmail";
 const cid = "aaaaaaaa-0000-4000-8000-000000000001";
 const message = () => ({
   confirmed: true as const,
@@ -33,6 +42,14 @@ const message = () => ({
 beforeEach(() => {
   vi.resetAllMocks();
   process.env.APP_ENCRYPTION_KEY = Buffer.alloc(32, 5).toString("base64");
+  process.env.GOOGLE_CLIENT_ID = "synthetic-client-id";
+  process.env.GOOGLE_CLIENT_SECRET = "synthetic-client-secret";
+  process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+  mocks.tokens.mockReturnValue({
+    access_token: "test-access",
+    refresh_token: "test-refresh",
+    expires_at: Date.now() + 3600000,
+  });
   mocks.identity.mockResolvedValue({ id: "user-a", demo: false });
   const w = demoWorkspace();
   w.demo = false;
@@ -60,17 +77,24 @@ beforeEach(() => {
   mocks.from.mockImplementation((table: string) => {
     const chain = {
       select: () => chain,
-      update: () => chain,
+      update: (value: unknown) => {
+        mocks.update(table, value);
+        return chain;
+      },
+      delete: () => {
+        mocks.delete(table);
+        return chain;
+      },
       eq: () => chain,
+      maybeSingle: async () => ({
+        data: { encrypted_tokens: encrypt(mocks.tokens()) },
+        error: null,
+      }),
       single: async () => ({
         data:
           table === "gmail_connections"
             ? {
-                encrypted_tokens: encrypt({
-                  access_token: "test-access",
-                  refresh_token: "test-refresh",
-                  expires_at: Date.now() + 3600000,
-                }),
+                encrypted_tokens: encrypt(mocks.tokens()),
               }
             : { outreach_status: "not_contacted", archived: false },
         error: null,
@@ -154,5 +178,105 @@ describe("Gmail send boundary", () => {
       ),
     ).toThrow();
     expect(() => mimeMessage("bad address", "subject", "body")).toThrow();
+  });
+  it("refreshes expired tokens, retains the refresh grant, and stores only ciphertext", async () => {
+    mocks.tokens.mockReturnValue({
+      access_token: "test-expired-access",
+      refresh_token: "test-refresh",
+      expires_at: 1,
+    });
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ access_token: "test-new-access", expires_in: 3600 }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: "gmail-message-2" }), {
+          status: 200,
+        }),
+      );
+    expect((await sendMessages(message())).results[0].status).toBe("sent");
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
+      "https://oauth2.googleapis.com/token",
+    );
+    expect(String(vi.mocked(fetch).mock.calls[0][1]?.body)).toContain(
+      "grant_type=refresh_token",
+    );
+    expect(mocks.update).toHaveBeenCalledWith(
+      "gmail_connections",
+      expect.objectContaining({ encrypted_tokens: expect.any(String) }),
+    );
+    const value = mocks.update.mock.calls[0][1].encrypted_tokens;
+    expect(value).not.toContain("test-new-access");
+    expect(value).not.toContain("test-refresh");
+  });
+  it("never accesses Gmail for another workspace's contact", async () => {
+    const input = message();
+    input.messages[0].contactId = crypto.randomUUID();
+    expect((await sendMessages(input)).results[0].status).toBe("failed");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it("revokes the refresh token before removing local credentials", async () => {
+    expect(await disconnect("user-a")).toBe(true);
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
+      "https://oauth2.googleapis.com/revoke",
+    );
+    expect(String(vi.mocked(fetch).mock.calls[0][1]?.body)).toBe(
+      "token=test-refresh",
+    );
+    expect(mocks.delete).toHaveBeenCalledWith("gmail_connections");
+  });
+  it("removes local credentials and reports a failed provider revocation", async () => {
+    vi.mocked(fetch).mockRejectedValue(new Error("provider unavailable"));
+    expect(await disconnect("user-a")).toBe(false);
+    expect(mocks.delete).toHaveBeenCalledWith("gmail_connections");
+  });
+  it("rejects identity-only consent before storing any Gmail credentials", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          access_token: "test-access",
+          refresh_token: "test-refresh",
+          expires_in: 3600,
+          scope: "openid email",
+        }),
+        { status: 200 },
+      ),
+    );
+    await expect(
+      exchangeCode("user-a", "synthetic-code", "synthetic-verifier"),
+    ).rejects.toThrow("send permission");
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+  it("rejects an unverified Google sender identity", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: "test-access",
+            refresh_token: "test-refresh",
+            expires_in: 3600,
+            scope: "openid email https://www.googleapis.com/auth/gmail.send",
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            email: "artist@example.test",
+            email_verified: false,
+          }),
+          { status: 200 },
+        ),
+      );
+    await expect(
+      exchangeCode("user-a", "synthetic-code", "synthetic-verifier"),
+    ).rejects.toThrow("not verified");
+    expect(mocks.from).not.toHaveBeenCalled();
   });
 });

@@ -1,33 +1,33 @@
-# Release status — 0.9.0 local beta
+# MusicMail v1.0.0 release gates
 
-This is a local beta, not a completed production V1. The user selected “Build locally; document hosted setup”. No hosted credentials were supplied or required for the local demonstration.
+Updated 2026-10-03. Published version remains 0.9.1. See [current acceptance and evidence](v1-acceptance.md).
 
-| Area                                | Local verification                                                         | Hosted gate                                      |
-| ----------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------ |
-| Artist onboarding                   | Browser journey and canonical SQL transaction tested                       | Real signup, confirmation and provider callbacks |
-| Explore / music filters             | Unit, SQL and browser tests                                                | Real catalogue quality and realistic latency     |
-| Network / private contacts / notes  | Browser and two-user RLS tests                                             | Real Supabase API isolation                      |
-| Relationship / outreach / follow-up | Validation, SQL history, UI interactions                                   | Timezone/operator acceptance                     |
-| Saved views / lists                 | Browser and SQL ownership checks                                           | User acceptance                                  |
-| CSV import / export                 | Quoted CSV, mapping, validation, duplicate warnings, browser import/export | Real Supabase concurrency and export acceptance  |
-| Gmail OAuth / refresh / disconnect  | Implemented; encryption, state design and token boundary reviewed          | Live consenting test account and Google review   |
-| Individual and small-batch sends    | Mocked provider tests, database reservation/success tests, browser preview | Real sends, refresh, revoke and failure recovery |
-| Templates / history                 | Merge helpers, default template SQL, browser previews                      | Real send timeline                               |
-| RLS / privacy                       | Real PostgreSQL tests with two users and admin                             | Supabase deployment configuration and backups    |
-| Admin                               | Restricted implementation; merge and subtype integrity SQL tests           | Trusted operator review and catalogue workflow   |
-| Responsive / accessibility          | Desktop/mobile browser checks and automated WCAG A/AA checks               | Manual assistive-technology review               |
-| Production deployment               | Configuration and instructions supplied                                    | Not deployed                                     |
-| Portfolio README                    | Architecture, screenshots, setup and limitations included                  | Add real demo URL after deployment               |
+## Completed candidate gates
 
-## Known limitations
+- [x] Hosted migrations 001–018, ownership backfill, membership RLS and private grants reviewed.
+- [x] Supabase password policy, verified-email access and secure Auth/recovery/change flows.
+- [x] Resend SMTP, verified auth.musicmailapp.uk sender, branded templates and inbox confirmation/reset completion.
+- [x] HTTPS candidate deployed with demo disabled, private server secrets and exact Site URL/redirects.
+- [x] Production Auth/CRM smoke, private export and account deletion cleanup.
+- [x] Hosted A/B isolation both directions; shared canonical entity and separate overlays; fixture cleanup.
+- [x] Rate limits inspected/documented and retained; provider/application 429 handling tested.
+- [x] Full local suite, hosted schema/grants, dependency review and browser/repository/history secret scans.
+- [x] Current documentation and anonymous Auth screenshots updated.
 
-- No real industry database has been collected. The 18 representative entities are clearly labelled synthetic and unverified.
-- Workspace summaries and result pages are bounded; explicit account exports are complete. Staging should still measure realistic multi-user concurrency and large note histories.
-- Admin is intentionally utilitarian and uses JSON for detailed entity edits; it is not a public contribution/moderation workflow.
-- Location entry currently resolves known taxonomy cities. Unrecognised free-text onboarding cities do not create new public locations automatically; add the location through a trusted catalogue maintenance process.
-- No automatic inbox sync, reply detection, delivery/read analytics or scheduled sending.
-- No external error monitoring account is configured. Safe structured events are emitted for database/OAuth/send failures.
-- Real authentication, OAuth provider behavior and production deployment cannot be certified by a local demo or mocked API tests.
-- Legal, consent-screen, retention, backup, incident-response and catalogue provenance reviews remain operator responsibilities.
+## Genuine blockers
 
-Version 1.0.0 and a production release should be created only when these gates pass. Do not infer live readiness from the existence of integration code.
+- [ ] Turnstile widget credentials, public site key in Vercel, secret/enforcement in Supabase, redeployment and live missing/invalid/successful challenge checks.
+- [ ] Gmail Google Cloud client/API setup, Vercel server credentials and exact callback; human consent plus controlled production send/refresh/disconnect acceptance.
+- [ ] Final changed-provider/release-candidate acceptance and scan after these configuration changes.
+
+Google identity login, MFA, collaboration UI and calendars are optional. The reviewed development-only braces advisory is non-blocking; production dependencies are clean. DMARC monitoring policy is valid; stronger enforcement and backup/monitoring rehearsals are hardening. See [classification](v1-acceptance.md#outstanding-classification).
+
+## Authorized publication only after blockers clear
+
+- [ ] Bump package/lockfile to 1.0.0 and finalize changelog/README.
+- [ ] Review the working tree and final no-secrets result; commit the release.
+- [ ] Create annotated v1.0.0 tag, preserving v0.9.0 and v0.9.1.
+- [ ] Push main and the tag without force/history rewriting.
+- [ ] Create GitHub release **MusicMail v1.0.0 — Production Foundation**.
+
+The deployed candidate is not a tagged v1 release. No repeated manual Auth/SMTP tests are requested; only unavailable provider setup and necessary Google permission require the operator.

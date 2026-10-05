@@ -1,3 +1,4 @@
+import "server-only";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 function key() {
   const value = Buffer.from(process.env.APP_ENCRYPTION_KEY || "", "base64");

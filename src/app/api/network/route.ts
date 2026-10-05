@@ -1,3 +1,4 @@
+import { rateLimit } from "@/lib/server/rate-limit";
 import { NextResponse } from "next/server";
 import { identity, supabase, checked } from "@/lib/server/supabase";
 import { readDemo } from "@/lib/server/demo";
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
         total: contacts.length,
       });
     }
+    await rateLimit("search", user.id, 120, 60);
     return NextResponse.json(
       checked(await (await supabase()).rpc("network_contacts", { filters })),
       { headers: { "Cache-Control": "no-store" } },

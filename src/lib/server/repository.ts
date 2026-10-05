@@ -1,4 +1,5 @@
 import "server-only";
+import { rateLimit } from "./rate-limit";
 import { checked, identity, supabase, serviceClient } from "./supabase";
 import { readDemo, mutateDemo } from "./demo";
 import { entities } from "../fixtures";
@@ -58,6 +59,7 @@ export async function workspace(
       sent: w.sent.slice(0, 20),
     };
   }
+  await rateLimit(full ? "export" : "workspace", user.id, full ? 10 : 180, 60);
   const db = await supabase();
   const document = checked(
     full
@@ -89,6 +91,7 @@ export async function discover(filters: Filters) {
       total: items.length,
     };
   }
+  await rateLimit("search", user.id, 120, 60);
   return checked(
     await (await supabase()).rpc("discover_entities", { filters }),
   ) as { items: Entity[]; total: number };
@@ -109,19 +112,23 @@ export async function mutate(a: Action) {
             : [];
     return workspace(false, selected);
   }
+  await rateLimit(
+    a.action === "import" ? "import" : "mutation",
+    user.id,
+    a.action === "import" ? 5 : 120,
+    60,
+  );
   const db = await supabase();
-  const owner = { user_id: user.id };
+  const owner = { user_id: user.id, workspace_id: user.id };
   switch (a.action) {
     case "profile":
       checked(
-        await db
-          .from("profiles")
-          .upsert({
-            id: user.id,
-            display_name: a.display_name,
-            timezone: a.timezone,
-            country: a.country,
-          }),
+        await db.from("profiles").upsert({
+          id: user.id,
+          display_name: a.display_name,
+          timezone: a.timezone,
+          country: a.country,
+        }),
       );
       break;
     case "add": {
@@ -132,7 +139,7 @@ export async function mutate(a: Action) {
           .from("user_contacts")
           .upsert(
             { ...owner, entity_id: a.entityId, archived: false },
-            { onConflict: "user_id,entity_id" },
+            { onConflict: "workspace_id,entity_id" },
           ),
       );
       break;
@@ -151,7 +158,7 @@ export async function mutate(a: Action) {
           .from("user_contacts")
           .update(a.patch)
           .eq("id", a.id)
-          .eq("user_id", user.id)
+          .eq("workspace_id", user.id)
           .select()
           .single(),
       );

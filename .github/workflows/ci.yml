@@ -21,7 +21,12 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
-      - run: npm audit --audit-level=moderate
+      - run: npm run check:dependencies
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-audits
+          path: .data/audit/*.json
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

@@ -1,5 +1,7 @@
 # MusicMail
 
+Production foundation work is in progress: [release gates](docs/release-checklist.md); [v1 status and setup handoff](docs/v1-progress.md). The published release remains v0.9.1.
+
 **Your music industry network, organised.**
 
 MusicMail is a music-industry discovery, CRM and outreach tool built for independent musicians. It is the first product from **GreenRoom Network**.
@@ -8,7 +10,7 @@ MusicMail is a music-industry discovery, CRM and outreach tool built for indepen
 
 **Current release: v0.9.1 local beta**
 
-The core local beta works with fictional demo data. Version 0.9.1 simplifies discovery, navigation, contact details and workspace layouts through progressive disclosure. Gmail production sending is not enabled in the demo and live OAuth/sending verification remains pending. Live Supabase verification also remains pending. Version 1.0.0 follows production infrastructure verification, security/privacy checks and final UX refinement.
+The published release remains 0.9.1. The production foundation candidate is deployed at [musicmail.vercel.app](https://musicmail.vercel.app), with Supabase Auth, verified Resend SMTP, workspace RLS, secure password recovery/change, export and deletion. Automated production Auth/CRM smoke and hosted isolation pass. CAPTCHA activation and live Gmail setup/acceptance remain v1 blockers; the operator confirmed Google Cloud has not yet been set up. The local demo retains fictional data and cannot send email. See the [current acceptance report](docs/v1-acceptance.md).
 
 ## Problem
 
@@ -18,7 +20,7 @@ The journey is **Discover → Add to Network → Organise → Contact → Follow
 
 ## Screenshots
 
-All screenshots show synthetic contacts from the local demo.
+CRM screenshots show synthetic contacts from the local demo. [Production sign-in](docs/screenshots/login-desktop.png) and [signup](docs/screenshots/signup-desktop.png) show anonymous forms with no account data; CAPTCHA activation is still pending.
 
 ![Explore music contacts](docs/screenshots/explore-desktop.png)
 
@@ -67,7 +69,7 @@ flowchart LR
   Gmail --> Google[Google OAuth + Gmail send API]
   API -. Explicit local demo .-> Demo[Isolated synthetic fixtures]
   DB --> Shared[Canonical entities + music taxonomies]
-  DB --> Private[Owner-scoped CRM overlay]
+  DB --> Private[Workspace CRM overlay]
 ```
 
 The central design is **one canonical entity identity + a private CRM overlay**. A venue, person, organisation or artist project has one `entities.id`. Roles and relationships describe what it does. Each musician’s `user_contacts` record links to that identity and owns their private relationship data. An imported contact has a null `entity_id` and is never published automatically.
@@ -82,7 +84,7 @@ The lockfile pins the installed versions. No hosted service is needed for the lo
 
 ## Security
 
-Every database table has RLS. Owner-scoped policies and composite foreign keys prevent cross-user notes and list memberships. Shared writes require administrator membership. Artist onboarding is a narrow transaction that creates a private canonical artist project.
+Every public database table has RLS. Workspace membership policies and composite foreign keys prevent cross-workspace notes and list memberships. Profiles/preferences remain user-bound. Shared writes require administrator membership. Artist onboarding is a narrow transaction that creates a private canonical artist project.
 
 Gmail tokens are AES-256-GCM encrypted, unavailable to the browser and stored in a table without authenticated-user grants. Sends require authenticated ownership, a same-origin request and explicit previews/confirmation. Duplicate attempt IDs cannot send again. Uncertain provider outcomes are reported without automatic retry.
 
@@ -90,15 +92,17 @@ Read [security](docs/security.md), [email security review](docs/email-security.m
 
 ## Configuration
 
-| Variable                                    | Purpose                                                        |
-| ------------------------------------------- | -------------------------------------------------------------- |
-| `MUSICMAIL_DEMO`                            | Explicit local fixture mode; `false` in production             |
-| `NEXT_PUBLIC_APP_URL`                       | Exact application origin, used for callbacks and origin checks |
-| `NEXT_PUBLIC_SUPABASE_URL`                  | Supabase project API URL                                       |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`             | Public Supabase key; RLS remains mandatory                     |
-| `SUPABASE_SERVICE_ROLE_KEY`                 | Server-only Gmail metadata and account deletion                |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Separate Gmail OAuth configuration                             |
-| `APP_ENCRYPTION_KEY`                        | 32 random bytes, base64 encoded; server-only                   |
+| Variable                                    | Purpose                                                         |
+| ------------------------------------------- | --------------------------------------------------------------- |
+| `MUSICMAIL_DEMO`                            | Explicit local fixture mode; `false` in production              |
+| `NEXT_PUBLIC_APP_URL`                       | Exact application origin, used for callbacks and origin checks  |
+| `NEXT_PUBLIC_SUPABASE_URL`                  | Supabase project API URL                                        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`             | Public Supabase key; RLS remains mandatory                      |
+| `SUPABASE_SERVICE_ROLE_KEY`                 | Server-only Gmail metadata and account deletion                 |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Separate Gmail OAuth configuration                              |
+| `APP_ENCRYPTION_KEY`                        | 32 random bytes, base64 encoded; server-only                    |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`            | Public widget key; matching secret stays in Supabase Auth       |
+| `GOOGLE_AUTH_ENABLED`                       | Optional identity login; false by default, independent of Gmail |
 
 Never put service credentials or encryption keys in `NEXT_PUBLIC_*` variables. `.env.local`, `.data`, logs and test artifacts are ignored.
 
@@ -113,11 +117,14 @@ npx playwright install chromium
 npm run test:e2e
 npm run build
 npm audit
+npm audit --omit=dev
 ```
 
 The PostgreSQL suite starts an isolated temporary cluster, applies every migration, applies the seed twice, and tests real SQL/RLS behavior with two users and an administrator. It uses a small Supabase Auth identity shim; it does not claim to test GoTrue or live OAuth.
 
 Browser tests cover artist setup, Explore, a private relationship, template previews, CSV import, lists, export, session isolation and mobile layout. Additional automated accessibility checks cover WCAG A/AA on key screens. Live Gmail sending needs a configured test account; see [release gates](docs/release-checklist.md).
+
+Opt-in hosted scripts use the ignored `.env.local`: `npm run test:hosted:isolation`, `npm run check:hosted-db`, `npm run test:hosted:auth`, and `npm run check:secrets`. Production browser acceptance requires `NEXT_PUBLIC_APP_URL=https://musicmail.vercel.app MUSICMAIL_LIVE_ACCEPTANCE=true`. Add `MUSICMAIL_SCAN_PRODUCTION=true` for a deployed browser-asset scan. Hosted fixtures are disposable and cleaned afterward; they never send SMTP emails. See [dependency audit](docs/dependency-audit.md) for five development findings and the clean production-only audit.
 
 ## Architecture documentation
 
@@ -156,4 +163,4 @@ No license has been selected and no LICENSE file is present. Public availability
 
 ## Author
 
-Developed for Nick Suciu / GreenRoom Network. Product and architecture baseline supplied in the MusicMail V1 specification. No deployment URL or production customer metrics are claimed.
+Developed for Nick Suciu / GreenRoom Network. Product and architecture baseline supplied in the MusicMail V1 specification. The deployed foundation candidate is not yet a tagged v1 release. No production customer metrics are claimed.

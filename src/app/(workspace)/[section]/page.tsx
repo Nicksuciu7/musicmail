@@ -1,3 +1,4 @@
+import { requirePageUser } from "@/lib/server/auth-guard";
 import { notFound } from "next/navigation";
 import { Workspace } from "@/components/workspace";
 export default async function Page({
@@ -19,5 +20,6 @@ export default async function Page({
     ].includes(section)
   )
     notFound();
+  await requirePageUser();
   return <Workspace page={section} />;
 }

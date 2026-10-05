@@ -1,4 +1,6 @@
 import { Onboarding } from "@/components/onboarding";
-export default function Page() {
+import { requirePageUser } from "@/lib/server/auth-guard";
+export default async function Page() {
+  await requirePageUser();
   return <Onboarding />;
 }

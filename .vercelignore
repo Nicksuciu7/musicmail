@@ -1,0 +1,15 @@
+# Upload application source only; secrets are configured through Vercel env settings.
+.env*
+.git
+.vercel
+.next
+node_modules
+.data
+test-results
+playwright-report
+coverage
+*.log
+*.db
+*.db-shm
+*.db-wal
+*.tsbuildinfo
