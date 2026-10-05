@@ -65,3 +65,7 @@ For live Auth browser acceptance, run the built application with `MUSICMAIL_DEMO
 ## Calendar / appearance verification
 
 Calendar runs in the explicit local demo without new provider accounts. Apply migrations 019–020 for the hosted adapter. `npm run test:db` includes the calendar role/isolation suite, and `npm run test:hosted:isolation` includes both new tables. After `npm run build`, `MUSICMAIL_E2E_PRODUCTION=true npm run test:e2e` runs the same browser suite against `next start` instead of the development server. Do not run concurrent Next build/dev processes against the same `.next` directory. See [Calendar](calendar.md), [themes](themes.md) and [acceptance](calendar-theme-acceptance.md).
+
+## Administrator acceptance
+
+See [administrator setup and safe promotion](admin.md). `npm run test:db` includes role upgrade, direct permissions, support projection/audit and AAL tests. `npm run test:hosted:admin` requires a running local non-demo production build and the existing private environment; it creates/deletes only disposable Auth/workspace fixtures and sends no email. Do not run simultaneously with builds or point it at production.

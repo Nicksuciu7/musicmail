@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { identity, supabase, checked } from "@/lib/server/supabase";
+import { checked } from "@/lib/server/supabase";
+import { requireAdminRequest } from "@/lib/server/admin";
 import { body, errorResponse } from "@/lib/server/http";
 const tableSchema = z.enum([
   "entity_contact_methods",
@@ -113,36 +114,34 @@ const schemas = {
     description: nullableText,
   }),
 };
-async function admin() {
-  if ((await identity()).demo) throw new Error("Admin unavailable in demo.");
-  const db = await supabase();
-  if (!checked(await db.rpc("is_admin"))) throw new Error("Admin required.");
-  return db;
-}
 export async function GET(request: Request) {
   try {
-    const db = await admin();
+    const { db } = await requireAdminRequest();
     const url = new URL(request.url);
     const table = tableSchema.parse(url.searchParams.get("table"));
-    let q = db.from(table).select("*");
+    let q = db.from(table).select(Object.keys(schemas[table].shape).join(","));
     if (table.startsWith("entity_") || table === "submission_channels")
       q = q.eq("entity_id", id.parse(url.searchParams.get("entityId")));
-    return NextResponse.json(checked(await q.limit(500)));
+    return NextResponse.json(checked(await q.limit(500)), {
+      headers: { "Cache-Control": "private, no-store" },
+    });
   } catch (e) {
     return errorResponse(e);
   }
 }
 export async function POST(request: Request) {
   try {
-    const db = await admin();
+    const { db } = await requireAdminRequest(true);
     const input = z
       .object({
         table: tableSchema,
         action: z.enum(["save", "delete"]),
         record: z.unknown(),
+        confirmed: z.literal(true).optional(),
       })
-      .parse(await body(request));
+      .parse(await body(request, 64000));
     if (input.action === "delete") {
+      z.literal(true).parse(input.confirmed);
       const row = z.object({ id }).parse(input.record);
       checked(await db.from(input.table).delete().eq("id", row.id));
     } else {
@@ -157,7 +156,10 @@ export async function POST(request: Request) {
       const payload: Record<string, unknown> = { ...row };
       checked(await db.from(input.table).upsert(payload));
     }
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(
+      { ok: true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (e) {
     return errorResponse(e);
   }

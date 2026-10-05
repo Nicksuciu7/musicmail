@@ -17,7 +17,6 @@ export default async function Page({
       "mail",
       "templates",
       "settings",
-      "admin",
     ].includes(section)
   )
     notFound();

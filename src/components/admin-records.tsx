@@ -20,11 +20,21 @@ export function AdminRecords() {
     }
   };
   const mutate = async (action: string) => {
+    if (
+      action === "delete" &&
+      !window.confirm("Delete this shared record? This cannot be undone.")
+    )
+      return;
     try {
       await request("/api/admin/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, table, record: JSON.parse(json) }),
+        body: JSON.stringify({
+          action,
+          table,
+          record: JSON.parse(json),
+          ...(action === "delete" ? { confirmed: true } : {}),
+        }),
       });
       await load();
       setMessage("Record saved.");

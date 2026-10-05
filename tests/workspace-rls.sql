@@ -4,7 +4,7 @@ do $$ declare t text; begin
  for t in select tablename from pg_tables where schemaname='public' loop
   if has_table_privilege('authenticated','public.'||t,'TRUNCATE,REFERENCES,TRIGGER') then raise exception 'Unsafe authenticated privilege on %',t; end if;
  end loop;
- foreach t in array array['workspaces','workspace_members','profiles','user_preferences','user_contacts','notes','lists','list_members','saved_views','interactions','email_templates','sent_emails','gmail_connections','email_send_attempts','admin_users'] loop
+ foreach t in array array['workspaces','workspace_members','profiles','user_preferences','user_contacts','notes','lists','list_members','saved_views','interactions','email_templates','sent_emails','gmail_connections','email_send_attempts','user_roles'] loop
   if not (select relrowsecurity from pg_class where oid=('public.'||t)::regclass) then raise exception 'RLS disabled on %',t; end if;
   if has_table_privilege('anon','public.'||t,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') then raise exception 'Anonymous grant on %',t; end if;
  end loop;
@@ -41,7 +41,7 @@ reset role;
 set role anon;
 do $$ declare t text; begin
  perform set_config('request.jwt.claim.sub','cccccccc-cccc-4ccc-8ccc-cccccccccccc',true);
- foreach t in array array['workspaces','workspace_members','profiles','user_preferences','user_contacts','notes','lists','list_members','saved_views','interactions','email_templates','sent_emails','gmail_connections','email_send_attempts','admin_users'] loop
+ foreach t in array array['workspaces','workspace_members','profiles','user_preferences','user_contacts','notes','lists','list_members','saved_views','interactions','email_templates','sent_emails','gmail_connections','email_send_attempts','user_roles'] loop
   begin execute format('select * from public.%I',t); raise exception 'Anonymous SELECT allowed on %',t;
   exception when insufficient_privilege then null; end;
  end loop;

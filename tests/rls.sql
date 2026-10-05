@@ -54,7 +54,7 @@ do $$ begin
  begin insert into user_contacts(user_id) values(auth.uid());raise exception 'Null identity accepted';exception when check_violation then null;end;
 end $$;
 reset role;
-insert into admin_users values('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+update user_roles set role='admin' where user_id='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 set role authenticated;
 select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
 do $$ begin

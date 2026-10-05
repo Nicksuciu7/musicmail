@@ -1,8 +1,12 @@
 # Changelog
 
-## Unreleased — Calendar, appearance and production foundation
+## Unreleased — Administration, Calendar, appearance and production foundation
 
 ### Added
+
+- Trusted member/admin roles preserving existing admins, server guards for every admin page/API, audited support views and protected role changes.
+- Migrations 021–023, immutable canonical/role audit triggers, narrow cross-workspace support reads and future AAL2 enforcement.
+- Normal-member self-promotion, admin route, secret omission, revocation, database upgrade and UI regression coverage; safe UUID-only bootstrap documentation.
 
 - Workspace calendar with Upcoming and Monday-start Month views, quick gig planning and Home next-up events.
 - Private equipment checklists, optional canonical venue/private contact/current artist links, and atomic event editing.

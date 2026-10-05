@@ -24,9 +24,15 @@ for migration in supabase/migrations/*.sql; do
   if [[ "$migration" == *202609290014_workspace_ownership.sql ]]; then
     psql -v ON_ERROR_STOP=1 -q -f tests/workspace-upgrade-before.sql
   fi
+  if [[ "$migration" == *202610050021_administrator_roles.sql ]]; then
+    psql -v ON_ERROR_STOP=1 -q -f tests/admin-upgrade-before.sql
+  fi
   psql -v ON_ERROR_STOP=1 -q -f "$migration"
   if [[ "$migration" == *202609290014_workspace_ownership.sql ]]; then
     psql -v ON_ERROR_STOP=1 -q -f tests/workspace-upgrade-after.sql
+  fi
+  if [[ "$migration" == *202610050021_administrator_roles.sql ]]; then
+    psql -v ON_ERROR_STOP=1 -q -f tests/admin-upgrade-after.sql
   fi
 done
 psql -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
@@ -35,4 +41,5 @@ psql -v ON_ERROR_STOP=1 -q -f tests/rls.sql
 psql -v ON_ERROR_STOP=1 -q -f tests/workspace-rls.sql
 psql -v ON_ERROR_STOP=1 -q -f tests/recovery-grants.sql
 psql -v ON_ERROR_STOP=1 -q -f tests/calendar-rls.sql
+psql -v ON_ERROR_STOP=1 -q -f tests/admin-rls.sql
 printf 'Database migrations, repeatable seed and RLS integration checks passed.\n'

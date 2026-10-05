@@ -40,3 +40,15 @@ Google identity login, MFA, collaboration UI and automatic external calendar syn
 - [ ] Create GitHub release **MusicMail v1.0.0 — Production Foundation**.
 
 The deployed candidate is not a tagged v1 release. No repeated manual Auth/SMTP tests are requested; only unavailable provider setup and necessary Google permission require the operator.
+
+## Requested administrator candidate
+
+- [x] Trusted member/admin persistence, default-member provisioning and safe UUID bootstrap procedure.
+- [x] Server-guarded `/admin` pages/APIs, private support views, confirmed role/canonical actions and immutable audit logs.
+- [x] Preserved member workspace RLS, explicit audited privileged reads, direct role/audit permission tests and hosted migration/grant checks.
+- [x] Full administrator UI, concurrency/revocation, secret omission and existing combined local/hosted regression acceptance.
+- [ ] Review/deploy the combined candidate and perform final production checks before v1 publication.
+
+See [administrator handoff](admin.md). No real account is automatically promoted; the project owner uses the documented verified Auth UUID operation.
+
+[Administrator test evidence](admin-acceptance.md).

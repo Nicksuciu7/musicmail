@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { identity, supabase, checked } from "@/lib/server/supabase";
+import { checked } from "@/lib/server/supabase";
+import { requireAdminRequest } from "@/lib/server/admin";
 import { body, errorResponse } from "@/lib/server/http";
 const inputSchema = z.discriminatedUnion("action", [
   z.object({
@@ -15,12 +16,12 @@ const inputSchema = z.discriminatedUnion("action", [
       ]),
       display_name: z.string().trim().min(1).max(200),
       description: z.string().max(5000),
-      location: z.string(),
-      organisation_type: z.string(),
-      roles: z.array(z.string()),
-      genres: z.array(z.string()),
-      emotions: z.array(z.string()),
-      aliases: z.array(z.string()),
+      location: z.string().max(200),
+      organisation_type: z.string().max(100),
+      roles: z.array(z.string().max(200)).max(100),
+      genres: z.array(z.string().max(200)).max(100),
+      emotions: z.array(z.string().max(200)).max(100),
+      aliases: z.array(z.string().max(200)).max(100),
       email: z.union([z.email(), z.literal("")]),
       verification_status: z.enum([
         "unverified",
@@ -28,14 +29,18 @@ const inputSchema = z.discriminatedUnion("action", [
         "potentially_outdated",
         "disputed",
       ]),
-      submission_type: z.string(),
+      submission_type: z.string().max(100),
       submission_status: z.enum(["open", "closed", "unknown"]),
-      submission_instructions: z.string(),
-      source: z.string().trim().min(1),
-      source_url: z.union([z.url(), z.literal("")]),
+      submission_instructions: z.string().max(5000),
+      source: z.string().trim().min(1).max(200),
+      source_url: z.union([z.url().max(2048), z.literal("")]),
     }),
   }),
-  z.object({ action: z.literal("archive"), id: z.uuid() }),
+  z.object({
+    action: z.literal("archive"),
+    id: z.uuid(),
+    confirmed: z.literal(true),
+  }),
   z.object({
     action: z.literal("merge"),
     source: z.uuid(),
@@ -51,12 +56,8 @@ const inputSchema = z.discriminatedUnion("action", [
 ]);
 export async function POST(request: Request) {
   try {
-    const u = await identity();
-    if (u.demo) throw new Error("Admin is unavailable in demo mode.");
-    const db = await supabase();
-    if (!checked(await db.rpc("is_admin")))
-      throw new Error("Admin access required.");
-    const a = inputSchema.parse(await body(request));
+    const { db } = await requireAdminRequest(true);
+    const a = inputSchema.parse(await body(request, 64000));
     if (a.action === "save")
       checked(await db.rpc("admin_save_entity", { document: a.document }));
     if (a.action === "archive")
@@ -82,7 +83,10 @@ export async function POST(request: Request) {
           slug: a.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         }),
       );
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(
+      { ok: true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (e) {
     return errorResponse(e);
   }

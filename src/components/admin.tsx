@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { AdminSupport } from "./admin-support";
 import { AdminRecords } from "./admin-records";
 import { Heading, Empty } from "./common";
 import { request } from "@/lib/client";
@@ -53,8 +54,8 @@ export function Admin({ enabled }: { enabled: boolean }) {
     <>
       <Heading
         eyebrow="Internal tools"
-        title="Look after the directory."
-        description="Edit verified facts, maintain provenance and confirm duplicate merges."
+        title="MusicMail administration."
+        description="Inspect accounts and workspaces for support, review the audit trail and maintain the shared directory."
       />
       {message && (
         <div className="source-box" role="status">
@@ -62,6 +63,7 @@ export function Admin({ enabled }: { enabled: boolean }) {
         </div>
       )}
       <div className="settings-stack">
+        <AdminSupport />
         <AdminRecords />
         <section className="panel">
           <h3>Create or edit an entity</h3>
@@ -115,7 +117,10 @@ export function Admin({ enabled }: { enabled: boolean }) {
             <button
               className="button danger"
               disabled={!id}
-              onClick={() => send({ action: "archive", id })}
+              onClick={() => {
+                if (window.confirm("Archive this canonical entity?"))
+                  void send({ action: "archive", id, confirmed: true });
+              }}
             >
               Archive loaded entity
             </button>

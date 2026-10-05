@@ -384,7 +384,7 @@ try {
         data: { action: "archive", id: contactId },
       })
     ).status(),
-    400,
+    403,
   );
   step = "Gmail permission boundary";
   const connection = await page.request.get(origin + "/api/gmail/connect", {

@@ -16,7 +16,7 @@ A clearly labelled demo uses synthetic fixtures and a browser-session-scoped ser
 
 Shared: entities, people, organisations, artist_projects, venues, organisation_types, venue_types, roles, entity_roles, relationship_types, entity_relationships, locations, entity_locations, genres, entity_genres, emotion_families, emotions, entity_emotions, entity_contact_methods, submission_channels, entity_aliases, entity_sources.
 
-Private: profiles, user_preferences, user_contacts, notes, interactions, saved_views, lists, list_members, email_templates, sent_emails. Operational: admin_users, gmail_connections, email_send_attempts. Artist ownership lives in entities.created_by; user-created artist projects begin private, avoiding involuntary publication during onboarding.
+Private: profiles, user_preferences, user_contacts, notes, interactions, saved_views, lists, list_members, email_templates, sent_emails. Operational: user_roles, admin_audit_log, gmail_connections, email_send_attempts. Artist ownership lives in entities.created_by; user-created artist projects begin private, avoiding involuntary publication during onboarding.
 
 ## Entity diagram
 
@@ -92,3 +92,7 @@ All Auth calls occur on the server with `@supabase/ssr`; the browser uses same-o
 Workspace → calendar_events → calendar_event_items uses membership RLS and composite parent/contact relationships. UTC instants plus IANA zones represent timed events; date ranges represent all-day events. A security-invoker RPC saves event/checklist atomically. Canonical venue links do not copy or publish entities. Server adapters provide the same interface for Supabase and explicit local demo. `CalendarExportProvider` separates manual external copies from future consented sync; MusicMail remains source of truth and Gmail scopes are unchanged.
 
 Personal appearance lives in profiles.theme and is read in the root server layout before rendering. Semantic CSS variables and a System media query implement both palettes; the client starts from the same preference. See [Calendar](calendar.md) and [themes](themes.md).
+
+## Administrator boundary
+
+`src/lib/server/admin.ts` owns reusable verified Auth/trusted-role guards for pages and APIs. `/admin` has a dedicated guarded layout/page; client visibility is only presentation. Existing canonical maintenance uses shared RLS and atomic database audit triggers. Support reads execute explicit, audited security-definer projections under verified admin state while ordinary private membership RLS remains unchanged. No arbitrary Auth object or provider credentials cross this boundary. [Details and bootstrap](admin.md).

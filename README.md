@@ -30,6 +30,8 @@ CRM screenshots show synthetic contacts from the local demo. [Production sign-in
 
 [Calendar in Light](docs/screenshots/calendar-light-desktop.png) · [Calendar in Dark](docs/screenshots/calendar-dark-desktop.png) · [Equipment checklist](docs/screenshots/calendar-detail-light.png) · [Mobile Calendar](docs/screenshots/calendar-dark-mobile.png)
 
+Administrator support, trusted roles and audit evidence: [admin setup and safe UUID promotion](docs/admin.md). The new admin UI is part of the pre-v1 feature candidate; it is not yet deployed to production.
+
 ## Local development
 
 Requires Node.js 22.12+ and npm. The included demonstration needs no external accounts.

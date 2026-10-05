@@ -65,3 +65,7 @@ No 1.0.0 version bump, release commit, v1 tag, main/tag push or GitHub v1 releas
 ## Calendar / appearance follow-up — 2026-10-05
 
 Calendar and System/Light/Dark are now required pre-v1 features, implemented on `feature/calendar-dark-mode`. Hosted migrations 019–020 were added; the production UI remains the previous foundation deployment. See [feature acceptance](calendar-theme-acceptance.md) for current test counts and limits. The October 3 table above records that earlier production candidate, not the new feature deployment. This feature pass does not authorize a merge to main or v1 publication.
+
+## Administrator candidate — 2026-10-05
+
+[Administrator acceptance](admin-acceptance.md) records the newer feature branch, hosted migrations 021–023, trusted member/admin model, server guards, audited support/canonical/role operations, preserved member isolation and complete combined checks. It supersedes older test totals for the current local candidate, without claiming a production application deployment or v1 release. [Safe verified-UUID promotion](admin.md#promote-your-existing-account-safely).

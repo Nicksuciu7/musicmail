@@ -15,7 +15,7 @@ PostgreSQL migrations in `supabase/migrations/` are the schema source of truth. 
 | CRM                         | user_contacts, notes, interactions                                 |
 | Organisation                | lists, list_members, saved_views                                   |
 | Outreach                    | email_templates, sent_emails                                       |
-| Restricted operations       | admin_users, gmail_connections, email_send_attempts                |
+| Restricted operations       | user_roles, admin_audit_log, gmail_connections, email_send_attempts                |
 
 See [the ER diagram](architecture.md#entity-diagram). The SQL files document every field, constraint and index.
 
@@ -23,7 +23,7 @@ See [the ER diagram](architecture.md#entity-diagram). The SQL files document eve
 
 `user_contacts(workspace_id,id)` and `lists(workspace_id,id)` have composite unique keys after migration 014. Notes, history, sent messages and list memberships reference those pairs, preventing cross-workspace attachment even with a guessed UUID. Linked shared contacts are unique per workspace and entity. `user_id` remains a nullable creator/actor audit field; membership governs access. Private contacts require a name and have no shared entity.
 
-The public directory is readable to authenticated users. Private artists are visible to their creator and administrators; CRM notes and history require workspace membership even for administrators. Archived public entities leave Explore but remain readable to existing contact owners. A confirmed merge preserves aliases, music metadata, sources, contact methods, submission channels and graph edges. Old IDs remain archived with `merged_into_id`; conflicting private overlays remain archived rather than silently overwriting someone's notes or statuses.
+The public directory is readable to authenticated users. Private artists are visible to their creator and administrators. Ordinary CRM notes/history queries require workspace membership even for administrators; explicit audited support functions provide narrowly scoped privileged reads. Archived public entities leave Explore but remain readable to existing contact owners. A confirmed merge preserves aliases, music metadata, sources, contact methods, submission channels and graph edges. Old IDs remain archived with `merged_into_id`; conflicting private overlays remain archived rather than silently overwriting someone's notes or statuses.
 
 ## Functions
 
@@ -70,3 +70,7 @@ Migration 018 adds service-only `recovery_grants` and atomic `consume_recovery_g
 ## Calendar / appearance migrations 019–020
 
 Additive migrations 202610050019_calendar and 202610050020_appearance are installed on the hosted project and recorded in its ledger. The existing 001–018 migrations were preserved. Events/items have membership RLS, limited grants, actor/workspace guards, composite parent/contact FKs, indexed date/parent access and deletion cascades. Optional entity links are validated through caller RLS. save_calendar_event is security invoker and atomic; no security-definer calendar write bypass exists. profiles.theme is constrained to system/light/dark, defaults to system, and uses the existing per-person profile RLS. See [calendar model](calendar.md), [appearance](themes.md) and [acceptance](calendar-theme-acceptance.md).
+
+## Administrator migrations 021–023
+
+021 upgrades the existing admin membership store to `user_roles`, preserves admins, backfills default members and provisions future accounts independently of client metadata. Role/audit table RLS and grants prevent ordinary role or log writes. `is_admin()` checks trusted state and optional AAL2. Protected role changes and canonical triggers write safe audit entries atomically. 022 adds allowlisted, paginated workspace support reads without broadening private-table RLS. 023 also records trusted service/database canonical maintenance as safe system audit entries. See [admin architecture and exact bootstrap](admin.md). All three migrations are installed and recorded on the existing hosted project; application deployment is separate.

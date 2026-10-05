@@ -49,7 +49,7 @@ assert.equal(
   "A public table has RLS disabled",
 );
 const privateTables =
-  "'profiles','user_preferences','workspaces','workspace_members','user_contacts','notes','interactions','lists','list_members','saved_views','email_templates','sent_emails','gmail_connections','email_send_attempts','request_buckets','recovery_grants','admin_users','calendar_events','calendar_event_items'";
+  "'profiles','user_preferences','workspaces','workspace_members','user_contacts','notes','interactions','lists','list_members','saved_views','email_templates','sent_emails','gmail_connections','email_send_attempts','request_buckets','recovery_grants','user_roles','admin_audit_log','calendar_events','calendar_event_items'";
 assert.equal(
   query(
     "select (has_schema_privilege('anon','public','create') or has_schema_privilege('authenticated','public','create'))::text;",
@@ -87,11 +87,25 @@ assert.equal(
 );
 assert.equal(
   query(
-    "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prosecdef and p.proname in ('is_admin','can_read_entity','is_workspace_member','reserve_email','record_sent','consume_request_limit','consume_recovery_grant','complete_onboarding','admin_save_entity','merge_entities','import_contacts') and not exists(select 1 from unnest(p.proconfig) setting where setting like 'search_path=%');",
+    "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prosecdef and p.proname in ('is_admin','can_read_entity','is_workspace_member','reserve_email','record_sent','consume_request_limit','consume_recovery_grant','complete_onboarding','admin_save_entity','merge_entities','import_contacts','admin_change_role','admin_users_page','admin_workspaces_page','admin_workspace_records','audit_admin_change','provision_member_role') and not exists(select 1 from unnest(p.proconfig) setting where setting like 'search_path=%');",
   ),
   "0",
   "Security definer search path missing",
 );
+assert.equal(
+  query(
+    "select (has_table_privilege('authenticated','public.user_roles','INSERT,UPDATE,DELETE,TRUNCATE') or has_table_privilege('authenticated','public.admin_audit_log','INSERT,UPDATE,DELETE,TRUNCATE') or has_table_privilege('service_role','public.admin_audit_log','INSERT,UPDATE,DELETE,TRUNCATE'))::text;",
+  ),
+  "false",
+  "Roles/audit writable outside trusted paths",
+);
+assert.equal(
+  query(
+    "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in ('admin_change_role','admin_users_page','admin_workspaces_page','admin_workspace_records') and (has_function_privilege('anon',p.oid,'execute') or not has_function_privilege('authenticated',p.oid,'execute'));",
+  ),
+  "0",
+  "Administrator RPC grant surface",
+);
 console.log(
-  `Hosted database: ${versions.length} migrations match; all public tables use RLS; anonymous/private, schema creation, unsafe grants, server-only tables and privileged RPC/search-path checks passed (8 checks). Read-only.`,
+  `Hosted database: ${versions.length} migrations match; all public tables use RLS; anonymous/private, schema creation, unsafe grants, server-only tables and privileged RPC/search-path checks passed (10 checks). Read-only.`,
 );
