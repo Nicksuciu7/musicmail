@@ -2,7 +2,7 @@
 
 > v1 foundation is in progress. See [current status and migration handoff](v1-progress.md) and [workspace migration details](database.md#workspace-migration-014-hosted). Hosted database/isolation and core Auth browser checks pass; production acceptance is incomplete. The published release remains v0.9.1.
 
-The combined foundation/Calendar/appearance/admin candidate is deployed at `https://musicmail.vercel.app` against Supabase project `thkrltiusxylpzqwfasx`. Migrations 001–023, exact production redirects, Resend SMTP and branded email flows are verified. Gmail consent, encrypted token storage, automatic refresh, one controlled self-send and inbox delivery are verified. Disconnect/revocation, public Google audience/verification readiness and CAPTCHA activation remain pending. See [current production checkpoint](google-gmail-acceptance.md). GitHub publication remains at 0.9.1.
+The combined foundation/Calendar/appearance/admin candidate is deployed at `https://musicmail.vercel.app` against Supabase project `thkrltiusxylpzqwfasx`. Migrations 001–023, exact production redirects, Resend SMTP and branded email flows are verified. Gmail consent, encrypted token storage, automatic refresh, one controlled self-send, inbox delivery and disconnect/revocation are verified. Public Google audience/verification readiness and CAPTCHA activation remain pending. See [current production checkpoint](google-gmail-acceptance.md). GitHub publication remains at 0.9.1.
 
 ## 1. Supabase
 

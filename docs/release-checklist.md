@@ -28,7 +28,8 @@ See [feature acceptance](calendar-theme-acceptance.md); no v1 publication is aut
 
 - [ ] Turnstile widget credentials, public site key in Vercel, secret/enforcement in Supabase, redeployment and live missing/invalid/successful challenge checks.
 - [x] Gmail credentials saved as sensitive Vercel Production variables; exact callback, send-only consent URL, PKCE/state/cookie protection and invalid-callback rejection pass.
-- [ ] Actual Google consent/token exchange, Gmail API/audience acceptance and controlled production send/refresh/disconnect.
+- [x] Actual Google consent/token exchange, Gmail API/test audience acceptance and controlled production self-send/inbox delivery/automatic refresh/disconnect; private send evidence retained, disposable contact archived.
+- [ ] Public Google audience and sensitive-scope verification readiness; current External/Testing mode limits users and refresh-token lifetime.
 - [ ] Final changed-provider/release-candidate acceptance and scan after these configuration changes.
 
 Google identity login, MFA, collaboration UI and automatic external calendar sync are optional. Internal Calendar/manual exports and appearance are deployed in the combined feature candidate; main merge and final changed-provider acceptance remain required before v1. The reviewed development-only braces advisory is non-blocking; production dependencies are clean after compatible patches. DMARC monitoring policy is valid; stronger enforcement and backup/monitoring rehearsals are hardening. See [current provider gates](google-gmail-acceptance.md#release-decision).

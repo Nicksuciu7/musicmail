@@ -9,8 +9,8 @@ Updated 2026-10-12. **Not released.** Published version remains 0.9.1. The combi
 - Working Resend SMTP/branded confirmation/recovery and DMARC are operator-verified; DNS records independently resolve.
 - Production dependency audit clean; five dev findings share one unpatched advisory, reviewed as non-blocking with a narrow CI exception.
 - Repository/history/local/deployed browser secret scans pass.
-- Gmail consent, encrypted token storage, automatic refresh, one controlled self-send and inbox delivery are verified. Disconnect/revocation acceptance is pending; the disposable self-test contact/history remains until final cleanup.
-- **Blockers:** Turnstile activation, final Gmail disconnect/revocation acceptance, public Google audience/verification readiness, then final provider-dependent release checks.
+- Gmail consent, encrypted token storage, automatic refresh, one controlled self-send and inbox delivery are verified. Disconnect/revocation is verified against production storage and Google token rejection; the disposable self-test contact is archived with private send evidence retained.
+- **Blockers:** Turnstile activation, public Google audience/verification readiness, then final provider-dependent release checks.
 - No v1 version bump, release commit, tag, push or GitHub release. Publication remains authorized only after actual blockers pass.
 
 The dated record below explains earlier work; its older setup/pending instructions are superseded by the acceptance report and current Auth/deployment documentation.

@@ -1,6 +1,6 @@
 # Gmail provider setup and consent
 
-**October 12 update:** the operator has saved both Google credentials as sensitive Vercel Production variables, and the combined candidate has been redeployed. See [current production checkpoint](google-gmail-acceptance.md). The setup instructions below are retained for reproducibility; do not repeat completed credential setup. Actual Google consent and controlled send/refresh/disconnect remain pending. This client is for Gmail permission, independent of optional Supabase Google sign-in.
+**October 12 update:** the operator has saved both Google credentials as sensitive Vercel Production variables, and the combined candidate has been redeployed. See [current production checkpoint](google-gmail-acceptance.md). The setup instructions below are retained for reproducibility; do not repeat completed credential setup. Actual Google consent, encrypted token storage, controlled self-send/inbox delivery, automatic refresh and disconnect/revocation are verified. The Cloud project remains External/Testing; public audience/verification readiness is pending. This client is for Gmail permission, independent of optional Supabase Google sign-in.
 
 1. Sign in at [Google Cloud Console](https://console.cloud.google.com/). Project selector → **New Project** → name **MusicMail** → **Create**; select it.
 2. **APIs & Services → Library → Gmail API → Enable**.
