@@ -4,13 +4,14 @@ Updated 2026-10-12. **Not released.** Published version remains 0.9.1. The combi
 
 - 23 hosted migrations match; every public table has RLS and reviewed grants.
 - 157 live member A/B isolation assertions pass in both directions; fixtures removed.
-- 111 production Auth/CRM/Calendar/Gmail-start assertions and 1,202 administrator acceptance assertions pass, including reset/change, export and deletion cleanup.
+- Before CAPTCHA activation, 111 production Auth/CRM/Calendar/Gmail-start assertions and 1,202 administrator acceptance assertions passed, including reset/change, export and deletion cleanup. Current hosted browser reruns stop at the genuine challenge; normal Safari challenge/login passes.
 - 155 unit tests, 15 Chromium journeys, typecheck/lint/build and PostgreSQL integration pass.
 - Working Resend SMTP/branded confirmation/recovery and DMARC are operator-verified; DNS records independently resolve.
 - Production dependency audit clean; five dev findings share one unpatched advisory, reviewed as non-blocking with a narrow CI exception.
 - Repository/history/local/deployed browser secret scans pass.
 - Gmail consent, encrypted token storage, automatic refresh, one controlled self-send and inbox delivery are verified. Disconnect/revocation is verified against production storage and Google token rejection; the disposable self-test contact is archived with private send evidence retained.
-- **Blockers:** Turnstile activation, public Google audience/verification readiness, then final provider-dependent release checks.
+- **Blockers:** Turnstile enforcement and normal-browser login pass; hosted Auth/admin automation after activation, public Google audience/verification readiness, then final provider-dependent release checks.
+- The owned-domain/public policy checkpoint is [prepared here](google-public-release.md); registrar DNS and policy operator details await the operator.
 - No v1 version bump, release commit, tag, push or GitHub release. Publication remains authorized only after actual blockers pass.
 
 The dated record below explains earlier work; its older setup/pending instructions are superseded by the acceptance report and current Auth/deployment documentation.

@@ -1,6 +1,6 @@
 # Authentication
 
-Current evidence (2026-10-12): production Auth/CRM/Calendar/Gmail-start smoke passes 111 assertions. Actual signup confirmation and password-reset delivery/completion are operator-verified; confirmation was also independently checked in Supabase. Resend SMTP and branded templates are active. Gmail consent, refresh, self-send/delivery and revocation passed. CAPTCHA activation and public Google readiness remain pending. See [production checkpoint](google-gmail-acceptance.md), [CAPTCHA checkpoint](captcha-acceptance.md) and [confirmation investigation](confirmation-link-verification.md).
+Current evidence (2026-10-12): production Auth/CRM/Calendar/Gmail-start smoke passes 111 assertions. Actual signup confirmation and password-reset delivery/completion are operator-verified; confirmation was also independently checked in Supabase. Resend SMTP and branded templates are active. Gmail consent, refresh, self-send/delivery and revocation passed. CAPTCHA enforcement is active; normal-browser challenge/login acceptance passed; hosted automation after activation and public Google readiness remain pending. See [production checkpoint](google-gmail-acceptance.md), [CAPTCHA checkpoint](captcha-acceptance.md) and [confirmation investigation](confirmation-link-verification.md).
 
 ## Identity and passwords
 
@@ -28,9 +28,9 @@ Confirmation links use `{{ .SiteURL }}/verify-email#token_hash={{ .TokenHash }}`
 
 The managed Turnstile widget obtains `captchaToken`; Supabase Auth performs server-side verification using the secret in its dashboard. No duplicate Siteverify call or application `TURNSTILE_SECRET_KEY` is needed: tokens are single-use.
 
-The production Managed widget for `musicmail.vercel.app` is created, its public site key is saved in Vercel Production as `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, and the widget is deployed. Use a separate widget for localhost development. In Supabase Authentication → Bot and Abuse Protection/Attack Protection → CAPTCHA, choose Turnstile, save the matching secret and enable enforcement. The prepared form remains unsaved pending private operator entry. Never put the secret in browser variables or chat. See [CAPTCHA configuration and live evidence](captcha-acceptance.md).
+The production Managed widget for `musicmail.vercel.app` is created, its public site key is saved in Vercel Production as `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, and the widget is deployed. Use a separate widget for localhost development. In Supabase Authentication → Bot and Abuse Protection/Attack Protection → CAPTCHA, choose Turnstile, save the matching secret and enable enforcement. The operator saved the matching secret privately; invalid-token provider rejection and all four missing-token guards pass. Never put the secret in browser variables or chat. See [CAPTCHA configuration and live evidence](captcha-acceptance.md).
 
-Signup, reset requests, resend and login require a challenge when configured. Password-change reauthentication receives a challenge too. Expired/failed challenges clear stale tokens; each submission remounts the widget. Provider CAPTCHA failures are surfaced safely, including reset/resend. Unconfigured local demo uses no widget and cannot authenticate or send email. Production CAPTCHA is a release gate, not currently claimed active.
+Signup, reset requests, resend and login require a challenge when configured. Password-change reauthentication receives a challenge too. Expired/failed challenges clear stale tokens; each submission remounts the widget. Provider CAPTCHA failures are surfaced safely, including reset/resend. Unconfigured local demo uses no widget and cannot authenticate or send email. Production CAPTCHA enforcement is active; the operator completed normal-browser challenge/login successfully. Hosted Auth/admin regression after activation remains pending.
 
 ## Rate limits
 

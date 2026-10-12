@@ -27,7 +27,9 @@ See [feature acceptance](calendar-theme-acceptance.md); no v1 publication is aut
 ## Genuine blockers
 
 - [x] Production Managed Turnstile widget, exact hostname, public Vercel site key and deployment; login/signup/recovery rendering and all four missing-token guards pass. See [CAPTCHA checkpoint](captcha-acceptance.md).
-- [ ] Matching secret/enforcement saved privately in Supabase; provider invalid-token rejection and successful live challenge acceptance.
+- [x] Matching secret/enforcement saved privately in Supabase; provider invalid-token rejection passes.
+- [x] Successful real-challenge authenticated acceptance in Safari; operator confirms login and protected Home is observed.
+- [ ] Rerun hosted Auth/admin regression after CAPTCHA activation; automation remains blocked at the real challenge.
 - [x] Gmail credentials saved as sensitive Vercel Production variables; exact callback, send-only consent URL, PKCE/state/cookie protection and invalid-callback rejection pass.
 - [x] Actual Google consent/token exchange, Gmail API/test audience acceptance and controlled production self-send/inbox delivery/automatic refresh/disconnect; private send evidence retained, disposable contact archived.
 - [ ] Public Google audience and sensitive-scope verification readiness; current External/Testing mode limits users and refresh-token lifetime.

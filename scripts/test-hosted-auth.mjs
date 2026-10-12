@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID, randomBytes, createHash } from "node:crypto";
 import strictAssert from "node:assert/strict";
 import Papa from "papaparse";
+import { hostedBrowserOptions, hostedChallenge } from "./hosted-challenge.mjs";
 let assertions = 0;
 const assert = new Proxy(strictAssert, {
   get(target, key) {
@@ -43,7 +44,7 @@ function check(r) {
   return r.data;
 }
 try {
-  browser = await chromium.launch();
+  browser = await chromium.launch(hostedBrowserOptions);
   const context = await browser.newContext();
   const page = await context.newPage();
   const cspErrors = [];
@@ -52,17 +53,7 @@ try {
       cspErrors.push(true);
   });
   async function challenge() {
-    if (!(await page.locator('[aria-label="Security verification"]').count()))
-      return undefined;
-    await page.waitForFunction(
-      () =>
-        Boolean(
-          document.querySelector('[name="cf-turnstile-response"]')?.value,
-        ),
-      null,
-      { timeout: 60000 },
-    );
-    return page.locator('[name="cf-turnstile-response"]').inputValue();
+    return hostedChallenge(page);
   }
   const post = async (data) => {
     if (["login", "signup", "forgot", "resend"].includes(data.action)) {
@@ -637,7 +628,7 @@ try {
     typeof error.cause === "string" &&
     /^[A-Za-z0-9_]{1,20}$/.test(error.cause)
   )
-    console.error("Provider error code: " + error.cause);
+    console.error("Safe failure code: " + error.cause);
   process.exitCode = 1;
 } finally {
   if (browser) await browser.close();

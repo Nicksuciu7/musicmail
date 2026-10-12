@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID, randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import strictAssert from "node:assert/strict";
+import { hostedBrowserOptions, hostedChallenge } from "./hosted-challenge.mjs";
 let assertions = 0;
 const assert = new Proxy(strictAssert, {
   get(target, key) {
@@ -93,7 +94,7 @@ function safePayload(value) {
 }
 try {
   step = "disposable fixture setup";
-  browser = await chromium.launch();
+  browser = await chromium.launch(hostedBrowserOptions);
   for (const label of ["a", "b", "admin"]) {
     const email = `musicmail-admin-${label}-${randomUUID()}@example.test`;
     const password = `Mm1!${randomBytes(24).toString("base64url")}`;
@@ -145,11 +146,12 @@ try {
     });
     fixture.page = await fixture.context.newPage();
     await fixture.page.goto(origin + "/login");
+    const captchaToken = await hostedChallenge(fixture.page);
     assert.equal(
       (
         await fixture.page.request.post(origin + "/api/auth", {
           headers: { Origin: origin },
-          data: { action: "login", email, password },
+          data: { action: "login", email, password, captchaToken },
         })
       ).status(),
       200,
@@ -643,7 +645,7 @@ try {
     typeof error.cause === "string" &&
     /^[A-Za-z0-9_]{1,20}$/.test(error.cause)
   )
-    console.error("Provider error code: " + error.cause);
+    console.error("Safe failure code: " + error.cause);
   process.exitCode = 1;
 } finally {
   if (browser) await browser.close();

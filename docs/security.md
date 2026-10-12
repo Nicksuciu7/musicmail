@@ -47,7 +47,7 @@ Optional TOTP enrollment/challenge UI is not implemented. MFA must be completed 
 
 ## Current acceptance
 
-See [v1 acceptance](v1-acceptance.md) for exact live results and remaining blockers. The production-only dependency audit is clean; five development findings share one currently unpatched braces advisory, assessed in [dependency-audit.md](dependency-audit.md). They do not justify a breaking framework downgrade. CAPTCHA credentials/enforcement and Gmail provider acceptance remain pending. Google identity sign-in, MFA, collaboration UI and calendars are future features rather than v1 blockers.
+See [v1 acceptance](v1-acceptance.md) for exact live results and remaining blockers. The production-only dependency audit is clean; five development findings share one currently unpatched braces advisory, assessed in [dependency-audit.md](dependency-audit.md). They do not justify a breaking framework downgrade. CAPTCHA enforcement and normal Safari challenge/login pass, as does controlled Gmail connection/refresh/send/revocation. Public Google readiness and hosted browser regression after CAPTCHA activation remain pending; see [current provider checkpoint](google-gmail-acceptance.md). Google identity sign-in, MFA and collaboration UI are optional. Internal Calendar/manual exports and appearance are implemented and tested.
 
 ## Calendar and appearance security
 
