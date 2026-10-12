@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Brand } from "@/components/common";
 import { ArrowUpRight, Compass, Users, Mail } from "lucide-react";
 import { demoEnabled } from "@/lib/server/supabase";
+import { appOrigin } from "@/lib/server/config";
 export const dynamic = "force-dynamic";
 export default function Landing() {
   return (
@@ -9,10 +10,10 @@ export default function Landing() {
       <header className="landing-nav">
         <Brand />
         <div className="actions">
-          <Link className="button" href="/login">
+          <Link className="button" href={`${appOrigin()}/login`}>
             Log in
           </Link>
-          <Link className="button primary" href="/signup">
+          <Link className="button primary" href={`${appOrigin()}/signup`}>
             Get started <ArrowUpRight size={14} />
           </Link>
         </div>
@@ -25,7 +26,7 @@ export default function Landing() {
           somewhere to go.
         </p>
         <div className="actions">
-          <Link className="button primary" href="/signup">
+          <Link className="button primary" href={`${appOrigin()}/signup`}>
             Start your next chapter <ArrowUpRight size={15} />
           </Link>
           {demoEnabled() && (
@@ -60,11 +61,15 @@ export default function Landing() {
             </p>
           </div>
         </section>
-        <footer className="muted">
-          MusicMail · A GreenRoom Network product
-          {demoEnabled()
-            ? " · Demo collection contains fictional contacts"
-            : ""}
+        <footer className="muted public-footer">
+          <span>
+            MusicMail · A GreenRoom Network product
+            {demoEnabled()
+              ? " · Demo collection contains fictional contacts"
+              : ""}
+          </span>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/support">Support</Link>
         </footer>
       </main>
     </>

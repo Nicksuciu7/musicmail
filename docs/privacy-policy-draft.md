@@ -1,10 +1,10 @@
 # MusicMail privacy notice — preparation draft
 
-This is a factual draft for operator review, not the live privacy policy. Operator identity/contact and operational retention must be settled before publication. It does not claim a completed legal or Google verification review.
+This records the preparation behind the new privacy notice. The operator confirmed Nicholas Suciu and musicmailsupport@gmail.com. The implementation is in `/privacy` and `/support`; deployed acceptance is recorded in [public Gmail preparation](google-public-release.md). This record does not claim Google verification or certify legal compliance.
 
 ## Operator and contact
 
-MusicMail is presented as a GreenRoom Network product. The legal operator and privacy/support contact are awaiting confirmation. Google currently shows the project owner's email as its consent support address; that alone does not establish a company identity or approved privacy contact.
+MusicMail is operated by **Nicholas Suciu**, with **musicmailsupport@gmail.com** for privacy/support requests, as confirmed by the operator. It is presented as a GreenRoom Network product. The source candidate implements `/privacy` and `/support` with anonymous homepage links. Google's project support selector currently uses the existing project-owner account; that provider setting is distinct from the new public contact.
 
 ## Information used by MusicMail
 
@@ -37,3 +37,7 @@ No fixed backup/log retention or immediate deletion from provider backups is pro
 ## Safe use and updates
 
 Users remain responsible for the contact data and messages they add and for honoring do-not-contact preferences and relevant outreach requirements. Publicly available professional details do not automatically authorize all marketing. Any material change in processing, providers or Gmail use must be reflected in the notice.
+
+## Source candidate
+
+The complete proposed notice is in [src/app/privacy/page.tsx](../src/app/privacy/page.tsx); the support page is [src/app/support/page.tsx](../src/app/support/page.tsx). Deployment and anonymous route verification are the next acceptance step. Retention is described using actual account/workspace lifecycle criteria without a fabricated backup deadline. The Google Limited Use commitment restricts human access to specific consent or permitted security/legal purposes; operator practices must follow that commitment before Google submission. Terms of service are optional under the current Google brand-verification requirements and their absence is not claimed to block v1.

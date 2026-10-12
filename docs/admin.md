@@ -106,3 +106,7 @@ npm run test:hosted:auth
 Turnstile production activation, Gmail production OAuth and live consent/send/refresh/disconnect, review/deployment of the combined candidate and final production acceptance remain release blockers. Completing administrator functionality does not authorize a v1 version bump, tag or release.
 
 Current verification and screenshots: [administrator acceptance](admin-acceptance.md).
+
+## Google data in support operations
+
+Follow the public privacy notice and Google's Limited Use requirements. An audited administrator role does not authorize unrelated browsing of Google data. Human access needs the user's specific agreement or a permitted necessary security/legal purpose; keep credentials out of support records. [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy).
