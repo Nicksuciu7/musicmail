@@ -502,9 +502,11 @@ export function Templates({
 export function Settings({
   w,
   refresh,
+  connectionFailed = false,
 }: {
   w: Workspace;
   refresh: () => Promise<void>;
+  connectionFailed?: boolean;
 }) {
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -624,6 +626,12 @@ export function Settings({
         <section className="panel settings-row">
           <div>
             <h3>Email</h3>
+            {connectionFailed && (
+              <div className="error-banner" role="alert">
+                Gmail connection failed. Please try Connect Gmail again and
+                approve the send-email permission.
+              </div>
+            )}
             <p>
               {w.gmailEmail
                 ? `Connected as ${w.gmailEmail}`

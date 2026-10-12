@@ -57,6 +57,7 @@ export function Workspace({ page }: { page: string }) {
   const router = useRouter();
   const [w, setW] = useState<WorkspaceData | null>(null);
   const [error, setError] = useState("");
+  const [gmailFailed, setGmailFailed] = useState(false);
   const [toast, setToast] = useState("");
   const [filters, setFilterState] = useState<Filters>(emptyFilters);
   const [entity, setEntity] = useState<Entity | null>(null);
@@ -83,10 +84,9 @@ export function Workspace({ page }: { page: string }) {
     setFilterState(
       parseFilters(new URLSearchParams(window.location.search).get("filters")),
     );
-    if (new URLSearchParams(window.location.search).get("gmail") === "failed")
-      setError(
-        "Gmail connection failed. Check your OAuth configuration and try again.",
-      );
+    setGmailFailed(
+      new URLSearchParams(window.location.search).get("gmail") === "failed",
+    );
   }, [refresh, page]);
   useEffect(() => {
     if (!toast) return;
@@ -380,7 +380,13 @@ export function Workspace({ page }: { page: string }) {
                 <MailScreen w={w} onCompose={() => setPicker(true)} />
               )}
               {page === "templates" && <Templates w={w} mutate={mutate} />}
-              {page === "settings" && <Settings w={w} refresh={refresh} />}
+              {page === "settings" && (
+                <Settings
+                  w={w}
+                  refresh={refresh}
+                  connectionFailed={gmailFailed}
+                />
+              )}
               {page === "admin" && <Admin enabled={w.isAdmin && !w.demo} />}
             </>
           )}

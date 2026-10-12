@@ -29,6 +29,12 @@ Test accounts and business records are disposable and removed in `finally`. Immu
 
 ## Required next consent
 
+### Connection follow-up
+
+The reported connection was checked against both production storage and the current Safari page: **zero saved Gmail connections**, `/settings?gmail=failed`, and the Email section still offering Connect Gmail. Google Cloud's MusicMail project (`musicmail-510518`) is External/Testing and includes the operator's account as a test user. The older generic callback logs do not establish the underlying failure reason; successful token exchange is not claimed.
+
+A UI race was found and fixed: the workspace refresh cleared the callback error immediately after loading. The failure now stays beside the Email controls and survives subsequent workspace refreshes. Connection success still comes from saved server data, never the `gmail=connected` query string. Typecheck, lint, **155 unit tests**, build and **15 Chromium tests** pass, including a regression for persistent failure feedback and forged success parameters. A fresh connection attempt with send permission is pending; no test email was sent or token revoked.
+
 Open **https://musicmail.vercel.app/settings**, sign in to your verified MusicMail account if needed, then choose **Connect Gmail** and accept the Google permission screen for your controlled account. Report whether Settings shows the connected address; do not share the OAuth URL, code, token or password.
 
 After consent, verify encrypted server-only token storage, one controlled send, sent metadata, forced access-token refresh and disconnect/revocation. No successful token exchange, Gmail delivery or refresh is claimed yet. The exact registered callback is `https://musicmail.vercel.app/api/gmail/callback`; its Google Cloud registration, Gmail API availability and audience permissions are ultimately exercised by actual consent/exchange.
