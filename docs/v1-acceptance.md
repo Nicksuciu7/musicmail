@@ -1,6 +1,6 @@
 # MusicMail production foundation acceptance — 2026-10-03
 
-**Candidate deployed; v1 not published.** Version remains 0.9.1. Authoritative current results; older progress entries are historical. Production: https://musicmail.vercel.app. GitHub: https://github.com/Nicksuciu7/musicmail. Baseline commit: `1a2bb0cd9be922937aca8ae82fc2b91fcf0b8a6f`. Candidate deployment: `dpl_4bZjTXNTiEGjnxZw6z26i2mr4hJk`, built from the working tree, not a v1 release commit.
+**Candidate deployed; v1 not published.** Version remains 0.9.1. See the [October 12 combined production checkpoint](google-gmail-acceptance.md) for the current deployment and results; the October 3 results below are historical. Production: https://musicmail.vercel.app. GitHub: https://github.com/Nicksuciu7/musicmail. Baseline commit: `1a2bb0cd9be922937aca8ae82fc2b91fcf0b8a6f`. Historical candidate deployment: `dpl_4bZjTXNTiEGjnxZw6z26i2mr4hJk`, built from the working tree, not a v1 release commit.
 
 ## Completed
 

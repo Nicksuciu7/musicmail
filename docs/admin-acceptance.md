@@ -1,5 +1,7 @@
 # Administrator candidate acceptance — 2026-10-05
 
+Historical feature checkpoint. The combined candidate was deployed and passed **1,202 production administrator assertions** on October 12; see [current deployment and provider gates](google-gmail-acceptance.md).
+
 Implemented on **feature/admin-security**, based on the completed foundation/Calendar/appearance checkpoint. Version remains **0.9.1**. Main and release tags are unchanged; the new application UI is not deployed to production.
 
 ## Delivered

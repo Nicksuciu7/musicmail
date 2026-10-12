@@ -391,8 +391,10 @@ try {
     maxRedirects: 0,
   });
   if (process.env.MUSICMAIL_EXPECT_GMAIL === "true") {
+    step = "Gmail connection redirect status";
     assert.equal(connection.status(), 307);
     const consent = new URL(connection.headers().location);
+    step = "Gmail consent endpoint, callback and scopes";
     assert.equal(consent.origin, "https://accounts.google.com");
     assert.equal(
       consent.searchParams.get("redirect_uri"),
@@ -403,6 +405,7 @@ try {
       "openid email https://www.googleapis.com/auth/gmail.send",
     );
     assert.equal(consent.searchParams.get("code_challenge_method"), "S256");
+    step = "Gmail OAuth client ID format";
     assert.match(
       consent.searchParams.get("client_id"),
       /^[A-Za-z0-9-]+\.apps\.googleusercontent\.com$/,
@@ -410,17 +413,30 @@ try {
     const oauthCookie = (await context.cookies()).find(
       (cookie) => cookie.name === "musicmail-oauth",
     );
+    step = "Gmail OAuth cookie protection";
     assert.ok(oauthCookie?.httpOnly);
     assert.equal(oauthCookie.sameSite, "Lax");
     assert.equal(oauthCookie.path, "/api/gmail");
     if (origin.startsWith("https:")) assert.ok(oauthCookie.secure);
     const saved = JSON.parse(decodeURIComponent(oauthCookie.value));
+    step = "Gmail OAuth identity, expiry, state and PKCE binding";
     assert.equal(saved.userId, userId);
     assert.equal(saved.state, consent.searchParams.get("state"));
     assert.ok(saved.state.length >= 32);
-    assert.ok(
-      saved.expires > Date.now() && saved.expires <= Date.now() + 600000,
-    );
+    // Compare two server timestamps; the operator's clock may differ from
+    // Vercel. HTTP Date has one-second precision. Cookie lifetime is exact.
+    const serverTime = Date.parse(connection.headers().date);
+    assert.ok(Number.isFinite(serverTime));
+    const remaining = saved.expires - serverTime;
+    assert.ok(remaining >= 599000 && remaining <= 601000);
+    const oauthHeader = connection
+      .headersArray()
+      .find(
+        (header) =>
+          header.name.toLowerCase() === "set-cookie" &&
+          header.value.startsWith("musicmail-oauth="),
+      );
+    assert.match(oauthHeader?.value ?? "", /;\s*Max-Age=600(?:;|$)/i);
     assert.equal(
       consent.searchParams.get("code_challenge"),
       createHash("sha256").update(saved.verifier).digest("base64url"),
@@ -431,6 +447,7 @@ try {
       "Gmail production credentials are not configured; connect gate remains blocked.",
     );
   }
+  step = "Gmail invalid callback rejection";
   const gmailCallback = await page.request.get(
     origin + "/api/gmail/callback?state=invalid&code=invalid",
     { maxRedirects: 0 },
@@ -440,6 +457,7 @@ try {
     origin + "/settings?gmail=failed",
   );
   assert.equal(gmailCallback.status(), 307);
+  step = "Gmail invalid callback consumes pending state";
   assert.ok(
     !(await context.cookies()).some(
       (cookie) => cookie.name === "musicmail-oauth",
@@ -449,8 +467,10 @@ try {
     .from("gmail_connections")
     .select("user_id", { count: "exact", head: true })
     .eq("user_id", userId);
+  step = "Gmail invalid callback does not create a connection";
   assert.equal(invalidConnection.error, null);
   assert.equal(invalidConnection.count, 0);
+  step = "Gmail disconnect boundary";
   assert.equal(
     (
       await page.request.post(origin + "/api/gmail/disconnect", {
@@ -608,7 +628,10 @@ try {
   console.error("Hosted Auth acceptance failed at: " + step);
   const frame = String(error.stack || "")
     .split("\n")
-    .find((line) => line.includes("test-hosted-auth.mjs:"));
+    .find(
+      (line) =>
+        line.includes("test-hosted-auth.mjs:") && !line.includes("Proxy."),
+    );
   if (frame) console.error(error.name + " " + frame.trim());
   if (
     typeof error.cause === "string" &&

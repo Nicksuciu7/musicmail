@@ -10,9 +10,9 @@ MusicMail is a music-industry discovery, CRM and outreach tool built for indepen
 
 **Current release: v0.9.1 local beta**
 
-The published release remains 0.9.1. The production foundation candidate is deployed at [musicmail.vercel.app](https://musicmail.vercel.app), with Supabase Auth, verified Resend SMTP, workspace RLS, secure password recovery/change, export and deletion. Automated production Auth/CRM smoke and hosted isolation pass. CAPTCHA activation and live Gmail setup/acceptance remain v1 blockers; the operator confirmed Google Cloud has not yet been set up. The local demo retains fictional data and cannot send email. See the [current acceptance report](docs/v1-acceptance.md).
+The published release remains 0.9.1. The combined production foundation candidate is deployed at [musicmail.vercel.app](https://musicmail.vercel.app), with Supabase Auth, verified Resend SMTP, workspace RLS, secure password recovery/change, export and deletion. Production Auth/CRM/Calendar and administrator acceptance and hosted isolation pass. Google credentials are saved as sensitive production variables; the secure Gmail connection start passes, while actual consent/send/refresh/disconnect and CAPTCHA activation remain v1 blockers. The local demo retains fictional data and cannot send email. See the [current production checkpoint](docs/google-gmail-acceptance.md).
 
-Calendar and System/Light/Dark appearance are completed on the unreleased `feature/calendar-dark-mode` branch. Hosted migrations 019–020 are installed; production UI remains the previous foundation candidate. See [Calendar](docs/calendar.md), [Appearance](docs/themes.md), and [feature acceptance](docs/calendar-theme-acceptance.md).
+Calendar and System/Light/Dark appearance are now deployed in the combined `feature/admin-security` candidate. Hosted migrations 001–023 are installed. Main and release tags are unchanged. See [Calendar](docs/calendar.md), [Appearance](docs/themes.md), and [feature acceptance](docs/calendar-theme-acceptance.md).
 
 ## Problem
 
@@ -30,7 +30,7 @@ CRM screenshots show synthetic contacts from the local demo. [Production sign-in
 
 [Calendar in Light](docs/screenshots/calendar-light-desktop.png) · [Calendar in Dark](docs/screenshots/calendar-dark-desktop.png) · [Equipment checklist](docs/screenshots/calendar-detail-light.png) · [Mobile Calendar](docs/screenshots/calendar-dark-mobile.png)
 
-Administrator support, trusted roles and audit evidence: [admin setup and safe UUID promotion](docs/admin.md). The new admin UI is part of the pre-v1 feature candidate; it is not yet deployed to production.
+Administrator support, trusted roles and audit evidence: [admin setup and safe UUID promotion](docs/admin.md). The admin UI is deployed and production-tested in the pre-v1 candidate. No real account is automatically promoted.
 
 ## Local development
 

@@ -1,5 +1,7 @@
 # Calendar and appearance acceptance — 2026-10-05
 
+Historical feature checkpoint. The combined candidate is deployed as of October 12; see [current production verification and provider gates](google-gmail-acceptance.md).
+
 Completed on `feature/calendar-dark-mode`, preserving the published 0.9.1 release. The existing uncommitted v1 foundation was first saved in checkpoint `42d8c11`. No v1 tag/release or merge/push to main is part of this pass.
 
 ## Delivered
