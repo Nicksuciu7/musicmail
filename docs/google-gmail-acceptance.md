@@ -8,7 +8,7 @@ Application commit: `63f3d2f60f0f4b4268e78cd87531e969a87874d7` on `feature/admin
 
 - Vercel confirms `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are **Sensitive Production** variables. No credential values were downloaded, printed or added to Git. Google identity sign-in remains separate and optional.
 - The previous production lockfile had new Next/source-map-js findings. Compatible patches to **Next 16.3.8** (matching lint configuration) and **source-map-js 1.2.2** restore a **zero-finding production audit**. The existing five development-only braces findings remain visible and narrowly reviewed; see [dependency review](dependency-audit.md).
-- Production CAPTCHA probe with a deliberately invalid token returns `invalid_credentials`, not `captcha_failed`; enforcement is still not verified. No challenge bypass or settings change was made.
+- The production Managed Turnstile widget and public Vercel key are deployed. Login/signup/recovery rendering and all four missing-token guards pass; the matching Supabase secret/enforcement still awaits private operator save, then invalid-token and successful challenge acceptance. Earlier direct-provider probing returned `invalid_credentials`, not `captcha_failed`. See [CAPTCHA checkpoint](captcha-acceptance.md). No challenge bypass was made.
 
 ## Automated results
 
