@@ -1,15 +1,16 @@
 # v1 production foundation: current progress
 
-Updated 2026-10-03. **Not released.** Published version remains 0.9.1. The foundation candidate is deployed at https://musicmail.vercel.app. Current authoritative evidence and classification: [v1 acceptance](v1-acceptance.md).
+Updated 2026-10-12. **Not released.** Published version remains 0.9.1. The combined foundation/Calendar/appearance/admin candidate is deployed at https://musicmail.vercel.app. Current authoritative evidence: [production provider checkpoint](google-gmail-acceptance.md). The earlier foundation report is [v1 acceptance](v1-acceptance.md).
 
-- 18 hosted migrations match; every public table has RLS and reviewed grants.
-- 106 live A/B isolation assertions pass in both directions; fixtures removed.
-- 68 production Auth/CRM assertions pass, including reset/change, export and deletion cleanup.
-- 98 unit tests, 6 Chromium journeys, typecheck/lint/build and PostgreSQL integration pass.
+- 23 hosted migrations match; every public table has RLS and reviewed grants.
+- 157 live member A/B isolation assertions pass in both directions; fixtures removed.
+- 111 production Auth/CRM/Calendar/Gmail-start assertions and 1,202 administrator acceptance assertions pass, including reset/change, export and deletion cleanup.
+- 155 unit tests, 15 Chromium journeys, typecheck/lint/build and PostgreSQL integration pass.
 - Working Resend SMTP/branded confirmation/recovery and DMARC are operator-verified; DNS records independently resolve.
 - Production dependency audit clean; five dev findings share one unpatched advisory, reviewed as non-blocking with a narrow CI exception.
 - Repository/history/local/deployed browser secret scans pass.
-- **Blockers:** Turnstile activation and real Gmail provider acceptance. Operator clarified Google Cloud has not been set up; earlier Gmail completion claims are superseded.
+- Gmail consent, encrypted token storage, automatic refresh, one controlled self-send and inbox delivery are verified. Disconnect/revocation acceptance is pending; the disposable self-test contact/history remains until final cleanup.
+- **Blockers:** Turnstile activation, final Gmail disconnect/revocation acceptance, public Google audience/verification readiness, then final provider-dependent release checks.
 - No v1 version bump, release commit, tag, push or GitHub release. Publication remains authorized only after actual blockers pass.
 
 The dated record below explains earlier work; its older setup/pending instructions are superseded by the acceptance report and current Auth/deployment documentation.

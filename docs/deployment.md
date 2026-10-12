@@ -2,7 +2,7 @@
 
 > v1 foundation is in progress. See [current status and migration handoff](v1-progress.md) and [workspace migration details](database.md#workspace-migration-014-hosted). Hosted database/isolation and core Auth browser checks pass; production acceptance is incomplete. The published release remains v0.9.1.
 
-The combined foundation/Calendar/appearance/admin candidate is deployed at `https://musicmail.vercel.app` against Supabase project `thkrltiusxylpzqwfasx`. Migrations 001–023, exact production redirects, Resend SMTP and branded email flows are verified. Google server credentials and secure OAuth start are verified; actual Gmail consent/send/refresh/disconnect and CAPTCHA activation remain blockers. See [current production checkpoint](google-gmail-acceptance.md). GitHub publication remains at 0.9.1.
+The combined foundation/Calendar/appearance/admin candidate is deployed at `https://musicmail.vercel.app` against Supabase project `thkrltiusxylpzqwfasx`. Migrations 001–023, exact production redirects, Resend SMTP and branded email flows are verified. Gmail consent, encrypted token storage, automatic refresh, one controlled self-send and inbox delivery are verified. Disconnect/revocation, public Google audience/verification readiness and CAPTCHA activation remain pending. See [current production checkpoint](google-gmail-acceptance.md). GitHub publication remains at 0.9.1.
 
 ## 1. Supabase
 
@@ -20,7 +20,7 @@ Load taxonomy data and then verified industry records. `supabase/seed.sql` inclu
 
 Enable email/password authentication and configure email confirmation and a production mail provider. If using Google sign-in, enable the Google provider in Supabase, register the Supabase callback URI shown by its dashboard, and configure provider credentials there. Set Supabase Auth Site URL to the app's HTTPS origin and allow the exact `/auth/callback` URL for each deployed environment. Avoid wildcard production redirects.
 
-To provision an internal administrator, add the intended existing Auth user UUID to `public.admin_users` through a trusted server/SQL operator session. Do not expose this action in the app. Administrator access controls shared records, not other users' private CRM data.
+To provision the first administrator, follow the verified-account bootstrap procedure in [administrator security](admin.md). Roles are held in `public.user_roles`; migration 021 replaced the earlier `admin_users` table. Use a trusted server/SQL operator session. Administrator support access uses narrow audited operations; ordinary private CRM policies continue to enforce workspace membership.
 
 ## 2. Google Gmail OAuth
 

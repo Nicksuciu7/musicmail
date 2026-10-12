@@ -27,7 +27,7 @@ Application commit: `63f3d2f60f0f4b4268e78cd87531e969a87874d7` on `feature/admin
 
 Test accounts and business records are disposable and removed in `finally`. Immutable, credential-free admin audit evidence is retained. These tests do not send Auth or Gmail emails. A test-clock comparison was corrected to compare the OAuth deadline with the server's second-resolution HTTP Date and require the exact `Max-Age=600` cookie; state, identity, PKCE and callback assertions remain enforced.
 
-## Required next consent
+## Gmail acceptance
 
 ### Connection follow-up
 
@@ -37,10 +37,16 @@ A UI race was found and fixed: the workspace refresh cleared the callback error 
 
 The feedback fix is deployed from `e8808e8` as `dpl_GiPVKniCGKmfuqqAcGKDkoreCBFq`, aliased to the production URL. [GitHub CI passed](https://github.com/Nicksuciu7/musicmail/actions/runs/38274389297). A disposable-account production browser check confirms the failure survives loading and account refresh, and a success query parameter cannot fabricate a connection; the fixture was removed. The subsequent secret scan passed across **213 repository files, 376 historical blobs, 18 local and 10 production browser assets**. Google Cloud Data Access now lists `gmail.send`; this configuration is separate from the operator granting consent through MusicMail. A saved connection remains unverified.
 
-Open **https://musicmail.vercel.app/settings**, sign in to your verified MusicMail account if needed, then choose **Connect Gmail** and accept the Google permission screen for your controlled account. Report whether Settings shows the connected address; do not share the OAuth URL, code, token or password.
+### Successful connection, refresh and controlled send
 
-After consent, verify encrypted server-only token storage, one controlled send, sent metadata, forced access-token refresh and disconnect/revocation. No successful token exchange, Gmail delivery or refresh is claimed yet. The exact registered callback is `https://musicmail.vercel.app/api/gmail/callback`; its Google Cloud registration, Gmail API availability and audience permissions are ultimately exercised by actual consent/exchange.
+The operator completed fresh Google consent. Production Settings shows the connected address, and the saved connection belongs to the same verified Auth account. Both access and refresh tokens decrypt successfully from AES-GCM encrypted server storage; no token values were printed or written to artifacts.
+
+One disposable private self-test contact was created through the production UI. One reviewed message, subject `MusicMail v1 Gmail acceptance self-test`, was sent from the connected account to itself. Production reported **Sent successfully**, and the matching message was visible in the recipient's Gmail inbox. The expired access token refreshed automatically during this send and the renewed token was encrypted back into storage. Read-only storage verification confirms exactly one successful attempt, a Gmail message ID, the expected recipient/subject/body, matching private workspace ownership, contact status `sent`, and `email_sent`/`outreach_status_changed` interactions. No retry was performed. The test contact and its history are retained pending final cleanup; no unrelated contacts were modified.
+
+The registered callback, Gmail API availability, configured client credentials and granted send scope are now exercised by a real exchange and send. Disconnect/revocation acceptance remains pending operator confirmation because it removes the saved credential and requires fresh consent to reconnect.
+
+Google's app is still External/Testing with the operator listed as a test user. Testing-mode refresh tokens expire after seven days when Gmail scopes are requested; public availability and Google's sensitive-scope verification requirements must be addressed before claiming unrestricted public Gmail readiness. See [Google token expiration](https://developers.google.com/identity/protocols/oauth2) and [sensitive-scope production readiness](https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification). This limitation does not prevent the controlled acceptance result above.
 
 ## Release decision
 
-**No v1 publication.** Remaining gates are actual Gmail consent/send/refresh/disconnect, Turnstile production activation and successful challenge acceptance, then final checks after those provider changes and the main/release preparation. Existing verified SMTP and confirmation/recovery evidence remains valid; no repeat manual email test is requested.
+**No v1 publication.** Remaining gates are Gmail disconnect/revocation, public Gmail audience/verification readiness, Turnstile production activation and successful challenge acceptance, then final checks after those provider changes and the main/release preparation. Existing verified SMTP and confirmation/recovery evidence remains valid; no repeat manual email test is requested.
