@@ -33,3 +33,23 @@ export function sessionCookieOptions() {
     path: "/",
   };
 }
+
+export function canonicalRedirect(requestUrl: string, method: string) {
+  if (!process.env.VERCEL || !["GET", "HEAD"].includes(method)) return null;
+  const source = new URL(requestUrl);
+  const destination = new URL(appOrigin());
+  const knownOrigins = [
+    "https://musicmail.vercel.app",
+    "https://app.musicmailapp.uk",
+  ];
+  if (
+    !knownOrigins.includes(source.origin) ||
+    !knownOrigins.includes(destination.origin) ||
+    source.origin === destination.origin
+  )
+    return null;
+  // Assign the path, rather than resolving it: //evil.example stays a path.
+  destination.pathname = source.pathname;
+  destination.search = source.search;
+  return destination;
+}

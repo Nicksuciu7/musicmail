@@ -3,7 +3,14 @@ import assert from "node:assert/strict";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 const fixtureId = randomUUID();
-const origin = "https://musicmail.vercel.app";
+const origin =
+  process.env.MUSICMAIL_CAPTCHA_ORIGIN || "https://musicmail.vercel.app";
+assert.ok(
+  ["https://musicmail.vercel.app", "https://app.musicmailapp.uk"].includes(
+    origin,
+  ),
+  "Use only a verified MusicMail production origin",
+);
 const auth = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

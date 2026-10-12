@@ -32,6 +32,8 @@ See [feature acceptance](calendar-theme-acceptance.md); no v1 publication is aut
 - [ ] Rerun hosted Auth/admin regression after CAPTCHA activation; automation remains blocked at the real challenge.
 - [x] Gmail credentials saved as sensitive Vercel Production variables; exact callback, send-only consent URL, PKCE/state/cookie protection and invalid-callback rejection pass.
 - [x] Actual Google consent/token exchange, Gmail API/test audience acceptance and controlled production self-send/inbox delivery/automatic refresh/disconnect; private send evidence retained, disposable contact archived.
+- [x] Owned application domain DNS/HTTPS and Google Search Console domain ownership; public privacy/support pages use the confirmed operator/contact.
+- [ ] Coordinated application-origin/provider redirect transition to the owned domain.
 - [ ] Public Google audience and sensitive-scope verification readiness; current External/Testing mode limits users and refresh-token lifetime.
 - [ ] Final changed-provider/release-candidate acceptance and scan after these configuration changes.
 

@@ -82,11 +82,17 @@ function browserScan(directory) {
 browserScan(".next/static");
 let remoteAssets = 0;
 if (process.env.MUSICMAIL_SCAN_PRODUCTION === "true") {
-  const origin = "https://musicmail.vercel.app";
-  const response = await fetch(origin + "/login", {
+  const response = await fetch("https://musicmail.vercel.app/login", {
     signal: AbortSignal.timeout(20000),
   });
   assert.equal(response.status, 200, "Production page inaccessible");
+  const origin = new URL(response.url).origin;
+  assert.ok(
+    ["https://musicmail.vercel.app", "https://app.musicmailapp.uk"].includes(
+      origin,
+    ),
+    "Unexpected production redirect host",
+  );
   const html = await response.text();
   scan(html, "production login HTML");
   const assets = [

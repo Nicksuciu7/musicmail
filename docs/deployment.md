@@ -77,3 +77,7 @@ The Gmail route declares a 300-second maximum duration. Confirm that the chosen 
 Use two test users to exercise signup, email confirmation, optional configured Google login, artist setup and RLS through the real Supabase API. Connect a consenting test Gmail account, send only to controlled recipients, verify sender identity and metadata, force an expired access token to exercise refresh, disconnect/revoke, and test an ambiguous failure without resend.
 
 Test exports with more than 1,000 records, account deletion, backup retention, admin merges, responsive UI and realistic search latency. Complete [release-checklist.md](release-checklist.md). Production acceptance deployment precedes tagging; create the v1.0.0 tag and GitHub release only after genuine blockers clear.
+
+## Owned-domain/privacy checkpoint — October 12
+
+`app.musicmailapp.uk` has verified A-record DNS and HTTPS and is attached to the existing project. Candidate `256917e`, deployment `dpl_42zAW8zU1XZwEEt5TmTd1jgukJCz`, serves `/privacy` and `/support` publicly on both aliases with the confirmed operator/contact. Google Search Console reports Domain ownership verified after the operator's root TXT save. Auth still uses the working configured Vercel origin; public login/signup links point there explicitly. See the [exact coordinated transition](google-public-release.md#coordinated-application-origin-transition-prepared-not-saved). This candidate remains 0.9.1, with no v1 tag/release.

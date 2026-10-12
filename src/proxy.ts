@@ -4,8 +4,15 @@ import {
   localDemo,
   sessionCookieOptions,
   appOrigin,
+  canonicalRedirect,
 } from "./lib/server/config";
 export async function proxy(request: NextRequest) {
+  const canonical = canonicalRedirect(request.url, request.method);
+  if (canonical) {
+    const redirect = NextResponse.redirect(canonical, 307);
+    redirect.headers.set("Cache-Control", "private, no-store");
+    return redirect;
+  }
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const dev = process.env.NODE_ENV === "development";
   const https = appOrigin().startsWith("https:");

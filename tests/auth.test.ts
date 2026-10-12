@@ -33,12 +33,15 @@ vi.mock("../src/lib/server/recovery", () => ({
 vi.mock("../src/lib/server/rate-limit", () => ({ rateLimit: mocks.limit }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ delete: vi.fn() }) }));
 import { POST } from "../src/app/api/auth/route";
+import { NextRequest } from "next/server";
+import { proxy } from "../src/proxy";
 import { authSchema, strongPassword } from "../src/lib/auth-validation";
 import { ApiError, body, errorResponse } from "../src/lib/server/http";
 import {
   appOrigin,
   localDemo,
   sessionCookieOptions,
+  canonicalRedirect,
 } from "../src/lib/server/config";
 const email = "auth-test@example.test",
   password = "Synthetic1!password";
@@ -362,6 +365,73 @@ describe("request and configuration boundaries", () => {
       sameSite: "lax",
       path: "/",
     });
+  });
+  it("moves safe alias requests only to the configured owned origin", () => {
+    process.env.VERCEL = "1";
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.musicmailapp.uk";
+    for (const method of ["GET", "HEAD"]) {
+      const target = canonicalRedirect(
+        "https://musicmail.vercel.app/verify-email?next=https://evil.example",
+        method,
+      );
+      expect(target?.origin).toBe("https://app.musicmailapp.uk");
+      expect(target?.pathname).toBe("/verify-email");
+      expect(target?.searchParams.get("next")).toBe("https://evil.example");
+    }
+  });
+  it("emits a temporary private alias redirect without copying cookies", async () => {
+    process.env.VERCEL = "1";
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.musicmailapp.uk";
+    const response = await proxy(
+      new NextRequest("https://musicmail.vercel.app/home", {
+        headers: { cookie: "synthetic-session=must-not-be-transferred" },
+      }),
+    );
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "https://app.musicmailapp.uk/home",
+    );
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.has("set-cookie")).toBe(false);
+  });
+  it("does not forward mutation bodies or credentials to another host", () => {
+    process.env.VERCEL = "1";
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.musicmailapp.uk";
+    for (const method of ["POST", "PUT", "PATCH", "DELETE"])
+      expect(
+        canonicalRedirect("https://musicmail.vercel.app/api/auth", method),
+      ).toBeNull();
+  });
+  it("cannot turn a path into an external redirect or redirect unknown hosts", () => {
+    process.env.VERCEL = "1";
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.musicmailapp.uk";
+    expect(
+      canonicalRedirect("https://musicmail.vercel.app//evil.example/x", "GET")
+        ?.href,
+    ).toBe("https://app.musicmailapp.uk//evil.example/x");
+    for (const source of [
+      "https://evil.example/login",
+      "https://musicmail.vercel.app.evil.example/login",
+      "https://musicmail-preview.vercel.app/login",
+      "http://musicmail.vercel.app/login",
+    ])
+      expect(canonicalRedirect(source, "GET")).toBeNull();
+  });
+  it("preserves canonical, local and preview behavior without redirect loops", () => {
+    process.env.VERCEL = "1";
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.musicmailapp.uk";
+    expect(
+      canonicalRedirect("https://app.musicmailapp.uk/login", "GET"),
+    ).toBeNull();
+    process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+    expect(
+      canonicalRedirect("https://musicmail.vercel.app/login", "GET"),
+    ).toBeNull();
+    delete process.env.VERCEL;
+    process.env.NEXT_PUBLIC_APP_URL = "https://app.musicmailapp.uk";
+    expect(
+      canonicalRedirect("https://musicmail.vercel.app/login", "GET"),
+    ).toBeNull();
   });
 });
 

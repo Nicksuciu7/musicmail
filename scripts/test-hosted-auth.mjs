@@ -21,7 +21,11 @@ const assert = new Proxy(strictAssert, {
 });
 const origin = process.env.NEXT_PUBLIC_APP_URL;
 if (
-  !["http://localhost:3000", "https://musicmail.vercel.app"].includes(origin) ||
+  ![
+    "http://localhost:3000",
+    "https://musicmail.vercel.app",
+    "https://app.musicmailapp.uk",
+  ].includes(origin) ||
   (origin.startsWith("https:") &&
     process.env.MUSICMAIL_LIVE_ACCEPTANCE !== "true")
 )
