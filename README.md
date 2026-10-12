@@ -10,7 +10,7 @@ MusicMail is a music-industry discovery, CRM and outreach tool built for indepen
 
 **Current release: v0.9.1 local beta**
 
-The published release remains 0.9.1. The combined production foundation candidate is deployed at [musicmail.vercel.app](https://musicmail.vercel.app), with Supabase Auth, verified Resend SMTP, workspace RLS, secure password recovery/change, export and deletion. Production Auth/CRM/Calendar and administrator acceptance and hosted isolation pass. Google credentials are saved as sensitive production variables; the secure Gmail connection start passes, while actual consent/send/refresh/disconnect and CAPTCHA activation remain v1 blockers. The local demo retains fictional data and cannot send email. See the [current production checkpoint](docs/google-gmail-acceptance.md).
+The published release remains 0.9.1. The combined production foundation candidate is deployed at [app.musicmailapp.uk](https://app.musicmailapp.uk), with Supabase Auth, verified Resend SMTP, workspace RLS, secure password recovery/change, export and deletion. Gmail consent/send/refresh/revocation and hosted isolation passed; Managed Turnstile enforcement and real Safari login also pass. Public Google verification, CAPTCHA-gated regression and final changed-provider acceptance remain release gates. The local demo retains fictional data and cannot send email. See the [current production checkpoint](docs/google-gmail-acceptance.md).
 
 Calendar and System/Light/Dark appearance are now deployed in the combined `feature/admin-security` candidate. Hosted migrations 001–023 are installed. Main and release tags are unchanged. See [Calendar](docs/calendar.md), [Appearance](docs/themes.md), and [feature acceptance](docs/calendar-theme-acceptance.md).
 
@@ -22,7 +22,7 @@ The journey is **Discover → Add to Network → Organise → Contact → Follow
 
 ## Screenshots
 
-CRM screenshots show synthetic contacts from the local demo. [Production sign-in](docs/screenshots/login-desktop.png) and [signup](docs/screenshots/signup-desktop.png) show anonymous forms with no account data; CAPTCHA activation is still pending.
+CRM screenshots show synthetic contacts from the local demo. [Production sign-in](docs/screenshots/login-desktop.png) and [signup](docs/screenshots/signup-desktop.png) show anonymous forms with no account data; these screenshots predate the active CAPTCHA widget.
 
 ![Explore music contacts](docs/screenshots/explore-desktop.png)
 

@@ -1,6 +1,6 @@
 # Authentication
 
-Current evidence (2026-10-12): production Auth/CRM/Calendar/Gmail-start smoke passes 111 assertions. Actual signup confirmation and password-reset delivery/completion are operator-verified; confirmation was also independently checked in Supabase. Resend SMTP and branded templates are active. Gmail consent, refresh, self-send/delivery and revocation passed. CAPTCHA enforcement is active; normal-browser challenge/login acceptance passed; hosted automation after activation and public Google readiness remain pending. See [production checkpoint](google-gmail-acceptance.md), [CAPTCHA checkpoint](captcha-acceptance.md) and [confirmation investigation](confirmation-link-verification.md).
+Current evidence (2026-10-12): production Auth/CRM/Calendar/Gmail-start smoke passed 111 assertions before CAPTCHA activation. Actual signup confirmation and password-reset delivery/completion are operator-verified; confirmation was also independently checked in Supabase. Resend SMTP and branded templates are active. Gmail consent, refresh, self-send/delivery and revocation passed. CAPTCHA enforcement is active; normal-browser challenge/login acceptance passed; hosted automation after activation and public Google readiness remain pending. See [production checkpoint](google-gmail-acceptance.md), [CAPTCHA checkpoint](captcha-acceptance.md) and [confirmation investigation](confirmation-link-verification.md).
 
 ## Identity and passwords
 
@@ -12,11 +12,11 @@ Current-password proof is required for password change. Reset requires a one-tim
 
 ## Production email and URLs
 
-Supabase project: `thkrltiusxylpzqwfasx`. Site URL: `https://musicmail.vercel.app`. Verified exact redirects:
+Supabase project: `thkrltiusxylpzqwfasx`. Site URL: `https://app.musicmailapp.uk`. Verified exact new-origin redirects (old exact Vercel entries remain temporarily):
 
-- `https://musicmail.vercel.app/auth/callback`
-- `https://musicmail.vercel.app/verify-email`
-- `https://musicmail.vercel.app/reset-password`
+- `https://app.musicmailapp.uk/auth/callback`
+- `https://app.musicmailapp.uk/verify-email`
+- `https://app.musicmailapp.uk/reset-password`
 
 Do not replace production Site URL with localhost or add wildcards. Local development uses `http://localhost:3000` and the corresponding three exact redirects in a local/separate configuration. Callback destinations come from the configured origin, never request parameters.
 
@@ -28,7 +28,7 @@ Confirmation links use `{{ .SiteURL }}/verify-email#token_hash={{ .TokenHash }}`
 
 The managed Turnstile widget obtains `captchaToken`; Supabase Auth performs server-side verification using the secret in its dashboard. No duplicate Siteverify call or application `TURNSTILE_SECRET_KEY` is needed: tokens are single-use.
 
-The production Managed widget for `musicmail.vercel.app` is created, its public site key is saved in Vercel Production as `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, and the widget is deployed. Use a separate widget for localhost development. In Supabase Authentication → Bot and Abuse Protection/Attack Protection → CAPTCHA, choose Turnstile, save the matching secret and enable enforcement. The operator saved the matching secret privately; invalid-token provider rejection and all four missing-token guards pass. Never put the secret in browser variables or chat. See [CAPTCHA configuration and live evidence](captcha-acceptance.md).
+The production Managed widget for `app.musicmailapp.uk` (with the old Vercel hostname temporarily retained) is created, its public site key is saved in Vercel Production as `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, and the widget is deployed. Use a separate widget for localhost development. In Supabase Authentication → Bot and Abuse Protection/Attack Protection → CAPTCHA, choose Turnstile, save the matching secret and enable enforcement. The operator saved the matching secret privately; invalid-token provider rejection and all four missing-token guards pass. Never put the secret in browser variables or chat. See [CAPTCHA configuration and live evidence](captcha-acceptance.md).
 
 Signup, reset requests, resend and login require a challenge when configured. Password-change reauthentication receives a challenge too. Expired/failed challenges clear stale tokens; each submission remounts the widget. Provider CAPTCHA failures are surfaced safely, including reset/resend. Unconfigured local demo uses no widget and cannot authenticate or send email. Production CAPTCHA enforcement is active; the operator completed normal-browser challenge/login successfully. Hosted Auth/admin regression after activation remains pending.
 
@@ -53,6 +53,8 @@ Google login is hidden by `GOOGLE_AUTH_ENABLED=false`, independent of Gmail. If 
 
 ## Reproducible acceptance
 
-`npm test` covers Auth handlers, inputs, recovery grants and widget failures. `npm run test:db` covers PostgreSQL ownership/rates. `npm run test:hosted:auth` accepts exact localhost:3000 in non-demo mode, or production with `NEXT_PUBLIC_APP_URL=https://musicmail.vercel.app MUSICMAIL_LIVE_ACCEPTANCE=true`. It creates/removes a disposable fixture and tests Auth/CRM without SMTP mail. The hosted isolation suite obtains real user JWTs using disposable admin-generated email proofs, then tests Data API RLS using user clients only.
+`npm test` covers Auth handlers, inputs, recovery grants and widget failures. `npm run test:db` covers PostgreSQL ownership/rates. `npm run test:hosted:auth` accepts exact localhost:3000 in non-demo mode, or production with `NEXT_PUBLIC_APP_URL=https://app.musicmailapp.uk MUSICMAIL_LIVE_ACCEPTANCE=true`. It creates/removes a disposable fixture and tests Auth/CRM without SMTP mail. The hosted isolation suite obtains real user JWTs using disposable admin-generated email proofs, then tests Data API RLS using user clients only.
 
-`node --env-file=.env.local scripts/check-hosted-captcha.mjs` checks negative production enforcement without creating users or sending email. Successful real-widget use is checked by browser smoke. Admin-generated token tests do not prove SMTP delivery; inbox evidence is recorded separately. Never use unrelated projects or personal production credentials in public CI. [Supabase CAPTCHA architecture](https://supabase.com/docs/guides/auth/auth-captcha).
+`MUSICMAIL_CAPTCHA_ORIGIN=https://app.musicmailapp.uk node --env-file=.env.local scripts/check-hosted-captcha.mjs` checks negative production enforcement without creating users or sending email. Successful real-widget use is checked by browser smoke. Admin-generated token tests do not prove SMTP delivery; inbox evidence is recorded separately. Never use unrelated projects or personal production credentials in public CI. [Supabase CAPTCHA architecture](https://supabase.com/docs/guides/auth/auth-captcha).
+
+The approved owned-origin transition and Safari login pass; see [domain acceptance](google-public-release.md#deployed-transition-acceptance). Turnstile secret rotation is pending after its appearance in a dashboard tool result. New-origin inbox completion and hosted regression remain open.

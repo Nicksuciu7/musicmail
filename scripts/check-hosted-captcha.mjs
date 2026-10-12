@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 const fixtureId = randomUUID();
 const origin =
-  process.env.MUSICMAIL_CAPTCHA_ORIGIN || "https://musicmail.vercel.app";
+  process.env.MUSICMAIL_CAPTCHA_ORIGIN || "https://app.musicmailapp.uk";
 assert.ok(
   ["https://musicmail.vercel.app", "https://app.musicmailapp.uk"].includes(
     origin,

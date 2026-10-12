@@ -2,9 +2,9 @@
 
 Gmail's controlled connection, encrypted storage, automatic refresh, self-send, inbox delivery and disconnect/revocation acceptance are complete. This checkpoint concerns access for ordinary users outside Google's test list, separate from optional Google identity sign-in.
 
-## Dashboard evidence
+## Initial dashboard evidence before the domain transition
 
-Project `musicmail-510518` → Google Auth Platform → Audience is **External / Testing**, with one test user. **Publish app** is disabled with an instruction to complete Branding. Branding has MusicMail's name and existing support email, but Application home page, privacy policy and terms links are blank. Its existing authorized domain is `musicmail.vercel.app`. Verification Center says verification is not required **because the app is Testing**; this is not a production approval.
+The initial inspection of project `musicmail-510518` → Google Auth Platform → Audience showed **External / Testing**, with one test user. **Publish app** was disabled with an instruction to complete Branding. Homepage/privacy links were blank and the existing authorized domain was `musicmail.vercel.app`. Verification Center said verification was not required **because the app was Testing**; this is not a production approval. The owned-domain URLs have since been entered/saved; final dashboard persistence and publishing readiness are still to be verified after a browser-control timeout.
 
 Google requires an accurate public homepage, linked public privacy policy and verified domain ownership for the sensitive-scope review. `gmail.send` is sensitive. Testing-mode limits and seven-day refresh-token expiry remain relevant. References: [brand verification](https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification), [sensitive-scope verification](https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification), [OAuth policies](https://developers.google.com/identity/protocols/oauth2/production-readiness/policy-compliance).
 
@@ -22,7 +22,7 @@ Google requires an accurate public homepage, linked public privacy policy and ve
 
 The saved explicit `app` record takes precedence over parking wildcard DNS. Nameservers and Resend's mail records were not changed. No registrar login/secret is in the repository.
 
-DNS, Vercel status and HTTPS are verified. The current working origin remains `https://musicmail.vercel.app`; no Auth origin, Supabase redirect, Gmail callback or Turnstile hostname is changed prematurely. Before switching the application origin, prepare exact coordinated Supabase/Vercel/Google/Turnstile changes, preserve the existing working path during transition, and re-run acceptance. Domain attachment alone does not complete that transition.
+DNS, Vercel status and HTTPS are verified. The coordinated transition is now saved and deployed. The canonical origin is `https://app.musicmailapp.uk`; the old alias redirects safe page requests there. Provider allowlists retain old entries temporarily during the transition.
 
 ## Policy preparation
 
@@ -32,27 +32,40 @@ After pages and ownership verification exist, prepare the exact Branding URLs an
 
 No v1 version bump, main merge, tag or GitHub release has been made.
 
-## Google ownership proof prepared
+## Google ownership proof verified
 
-Search Console is signed into the existing project-owner Google account. A Domain property for `musicmailapp.uk` is prepared and its DNS-verification dialog is open. The public TXT proof has been provided directly to the operator for Porkbun root DNS. The operator saved the exact root TXT record and replied to the prepared verification handoff. Both authoritative Porkbun DNS and a public resolver return the matching proof. Search Console reports **Ownership verified**, using Domain name provider verification. Ownership is verified for the existing Google project-owner account; retain the TXT record. Never replace existing unrelated TXT records.
+The operator saved the exact root TXT proof in Porkbun and authorized the prepared Search Console ownership check. Both authoritative Porkbun DNS and a public resolver return the matching proof. Search Console reports **Ownership verified**, using Domain name provider verification for `musicmailapp.uk` and the existing Google project-owner account. Retain the TXT record; never replace unrelated records.
 
-## Coordinated application-origin transition (prepared, not saved)
+## Coordinated application-origin transition (saved and deployed)
 
-| Service                                 | Exact intended value                                                                                                                  |
+| Service                                 | Transition configuration                                                                                                              |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Vercel Production `NEXT_PUBLIC_APP_URL` | `https://app.musicmailapp.uk`                                                                                                         |
 | Supabase Auth Site URL                  | `https://app.musicmailapp.uk`                                                                                                         |
 | Supabase exact redirect allowlist       | `https://app.musicmailapp.uk/auth/callback`, `https://app.musicmailapp.uk/verify-email`, `https://app.musicmailapp.uk/reset-password` |
 | Existing Turnstile widget hostname      | Add `app.musicmailapp.uk`; preserve current `musicmail.vercel.app` during transition                                                  |
 | Existing Google Web client callback     | Add `https://app.musicmailapp.uk/api/gmail/callback`; preserve current callback during transition                                     |
-| Google Branding homepage                | `https://app.musicmailapp.uk/`                                                                                                        |
-| Google Branding privacy link            | `https://app.musicmailapp.uk/privacy`                                                                                                 |
+| Google Branding homepage                | `https://app.musicmailapp.uk/` — entered/saved; final persistence review pending                                                      |
+| Google Branding privacy link            | `https://app.musicmailapp.uk/privacy` — entered/saved; final persistence review pending                                               |
 | Google authorized domain                | `musicmailapp.uk` once ownership is verified                                                                                          |
 
-No new Google scope or secret is required. Do not switch Vercel's origin before the provider allowlists are ready. The source candidate adds the verified owned origin to explicit hosted-test allowlists while retaining opt-in. Canonical proxy redirects are prepared for GET/HEAD between the two known HTTPS origins only, using the configured origin. POST/PUT/PATCH/DELETE are not forwarded to another host, unknown/preview/local origins are unchanged, and assigning the path prevents protocol-relative open redirects. Public-page login/signup links already use the configured working origin. No provider URL or production origin has been switched yet. Public Gmail publication and sensitive-scope review remain pending.
+No new Google scope or secret is required. Do not switch Vercel's origin before the provider allowlists are ready. The source candidate adds the verified owned origin to explicit hosted-test allowlists while retaining opt-in. Canonical proxy redirects are prepared for GET/HEAD between the two known HTTPS origins only, using the configured origin. POST/PUT/PATCH/DELETE are not forwarded to another host, unknown/preview/local origins are unchanged, and assigning the path prevents protocol-relative open redirects. Public-page login/signup links already use the configured working origin. The operator explicitly approved the coordinated switch. Vercel Production Config, Supabase Site URL/exact redirects, the existing Turnstile hostname list and the existing Google client callback are saved. Google Branding homepage/privacy URLs are prepared; their persisted state needs final dashboard verification. Public Gmail publication and sensitive-scope review remain pending.
 
 ## Transition source validation
 
 Typecheck/lint and the production build pass. **160 unit tests** include five new canonical-origin security cases: exact GET/HEAD destination, real no-store 307 without cookie transfer, no mutation forwarding, hostile/unknown URL boundaries and local/preview/loop preservation. The public-page candidate passed **15 existing optimized browser journeys** and non-demo anonymous/mobile/theme/accessibility QA. Hosted negative CAPTCHA enforcement still passes after deployment. The post-deployment secret scan covers **220 repository files, 409 historical blobs, 18 local and 10 production browser assets** with no known credential exposure. [Public-page CI passed](https://github.com/Nicksuciu7/musicmail/actions/runs/38310721412).
 
-Canonical routing/provider-transition source is prepared but not yet deployed, so the owned public homepage/privacy/support pages currently retain the working Vercel Auth links. Updating the Google client's approved redirect target requires the browser-control action-time confirmation; the exact intended settings are listed above. No secret rotation, broader Google scope or v1 publication is part of that operation.
+## Deployed transition acceptance
+
+Application commit `890b0a0` is deployed as `dpl_CbhkxSrzTtcWnxhh15sWZRvkQgwb` ([inspect](https://vercel.com/nicksuciu7/musicmail/CbhkxSrzTtcWnxhh15sWZRvkQgwb)). [Candidate CI passed](https://github.com/Nicksuciu7/musicmail/actions/runs/38311738036), including application/browser and database jobs. Vercel build passed and aliases the owned domain.
+
+- Old `/`, `/login`, `/privacy`, `/support`, `/verify-email` and `/reset-password` return a no-store 307 to the matching owned path/query with no Set-Cookie; the owned routes return 200.
+- Stale/untrusted Origin submissions fail before Auth with HTTP 400 and `Request origin could not be verified.` Old-origin POST is rejected without a redirect. This guard intentionally uses 400, not 403.
+- Anonymous workspace, export, Gmail-connect and admin records/support endpoints return 401.
+- Supabase Site URL and all six old/new exact redirect entries persist after reload. Generated recovery links accept the new default and all three exact new paths. No emails were sent; the disposable fixture was removed.
+- Google client reload shows both old and owned Gmail callbacks. Cloudflare confirms the same Managed widget's hostname update succeeded; no scope or public site key changed.
+- Negative CAPTCHA enforcement passes on the owned origin. The operator confirms a successful Safari login on the owned domain. Hosted Auth automation still times out at the first real challenge before fixture creation; no bypass was used. Hosted admin regression remains open.
+- Hosted read-only security review passes: 23 migrations match and all 10 RLS/grant checks pass.
+- Secret scan passes across 220 repository files, 421 historical blobs, 18 local and 10 current production browser assets. A separate dashboard-inspection incident exposed the Turnstile secret in a tool result; operator rotation and matching Supabase update are required before release. No value is included here or in Git.
+
+New-origin confirmation/recovery inbox completion and provider-dependent regressions remain acceptance gates. The existing SMTP/templates are unchanged; they derive their host from the saved Site URL. No v1 release, version bump, main merge or tag was made.

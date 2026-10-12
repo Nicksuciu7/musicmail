@@ -2,7 +2,7 @@
 
 > v1 foundation is in progress. See [current status and migration handoff](v1-progress.md) and [workspace migration details](database.md#workspace-migration-014-hosted). Hosted database/isolation and core Auth browser checks pass; production acceptance is incomplete. The published release remains v0.9.1.
 
-The combined foundation/Calendar/appearance/admin candidate is deployed at `https://musicmail.vercel.app` against Supabase project `thkrltiusxylpzqwfasx`. Migrations 001–023, exact production redirects, Resend SMTP and branded email flows are verified. Gmail consent, encrypted token storage, automatic refresh, one controlled self-send, inbox delivery and disconnect/revocation are verified. Public Google audience/verification readiness and hosted Auth/admin regression after activation remain pending; CAPTCHA enforcement and normal-browser login pass. See [current production checkpoint](google-gmail-acceptance.md). GitHub publication remains at 0.9.1.
+The combined foundation/Calendar/appearance/admin candidate is deployed at `https://app.musicmailapp.uk` against Supabase project `thkrltiusxylpzqwfasx`. Migrations 001–023, exact production redirects, Resend SMTP and branded email flows are verified. Gmail consent, encrypted token storage, automatic refresh, one controlled self-send, inbox delivery and disconnect/revocation are verified. Public Google audience/verification readiness and hosted Auth/admin regression after activation remain pending; CAPTCHA enforcement and normal-browser login pass. See [current production checkpoint](google-gmail-acceptance.md). GitHub publication remains at 0.9.1.
 
 ## 1. Supabase
 
@@ -29,7 +29,7 @@ Use a Google Cloud project with Gmail API enabled and a web application OAuth cl
 Register this exact authorised redirect URI for the app's domain:
 
 ```text
-https://musicmail.vercel.app/api/gmail/callback
+https://app.musicmailapp.uk/api/gmail/callback
 ```
 
 For local development, register `http://localhost:3000/api/gmail/callback` separately. Do not put localhost into production application configuration. Gmail requests only `openid email` and `gmail.send`. Login and send consent are distinct even if the same Cloud project is used.
@@ -52,13 +52,13 @@ No licence has been imposed automatically; choose a licence deliberately before 
 
 ## 4. Vercel
 
-Project `nicksuciu7/musicmail` is linked locally. Production origin: `https://musicmail.vercel.app`. The first foundation deployment is an acceptance candidate, not the v1 release. It is deployed directly from the working tree; the GitHub beta is not the source of these uncommitted changes. Production environment values are configured privately in Vercel, and `.vercelignore` excludes local env files and artifacts. SMTP is verified. Gmail credentials/controlled acceptance and Turnstile enforcement are complete; public Google readiness and hosted Auth/admin regression after activation remain outstanding.
+Project `nicksuciu7/musicmail` is linked locally. Production origin: `https://app.musicmailapp.uk`. The first foundation deployment is an acceptance candidate, not the v1 release. It is deployed from the committed `feature/admin-security` candidate; the published GitHub beta remains 0.9.1. Production environment values are configured privately in Vercel, and `.vercelignore` excludes local env files and artifacts. SMTP is verified. Gmail credentials/controlled acceptance and Turnstile enforcement are complete; public Google readiness and hosted Auth/admin regression after activation remain outstanding.
 
 Import the intended GitHub repository using the Next.js preset. `vercel.json` supplies the build/install commands and London region preference. Set environment variables for each deployment environment:
 
 ```text
 MUSICMAIL_DEMO=false
-NEXT_PUBLIC_APP_URL=https://musicmail.vercel.app
+NEXT_PUBLIC_APP_URL=https://app.musicmailapp.uk
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
@@ -80,4 +80,4 @@ Test exports with more than 1,000 records, account deletion, backup retention, a
 
 ## Owned-domain/privacy checkpoint — October 12
 
-`app.musicmailapp.uk` has verified A-record DNS and HTTPS and is attached to the existing project. Candidate `256917e`, deployment `dpl_42zAW8zU1XZwEEt5TmTd1jgukJCz`, serves `/privacy` and `/support` publicly on both aliases with the confirmed operator/contact. Google Search Console reports Domain ownership verified after the operator's root TXT save. Auth still uses the working configured Vercel origin; public login/signup links point there explicitly. See the [exact coordinated transition](google-public-release.md#coordinated-application-origin-transition-prepared-not-saved). This candidate remains 0.9.1, with no v1 tag/release.
+The approved transition is deployed from `890b0a0`, deployment `dpl_CbhkxSrzTtcWnxhh15sWZRvkQgwb`. The owned domain has verified DNS/HTTPS and Google Search Console ownership. Supabase Site URL/exact redirects, Vercel public APP_URL, Turnstile hostname and Gmail callback are saved. Real Safari login passes. Old Vercel GET/HEAD links redirect without moving session cookies; stale-origin mutations fail. See [transition evidence and remaining gates](google-public-release.md#deployed-transition-acceptance). The old provider entries remain temporarily during migration. Turnstile secret rotation, changed-origin email/regression acceptance and public Google verification remain open. This candidate remains 0.9.1, with no v1 tag/release.

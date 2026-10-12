@@ -1,6 +1,6 @@
 # Production CAPTCHA checkpoint — 2026-10-12
 
-The Cloudflare account is signed in and a widget named **MusicMail production authentication** has been created. It uses **Managed** mode, allows only `musicmail.vercel.app`, and leaves pre-clearance disabled. Local development can use a separate widget; localhost is not allowed by this production widget.
+The Cloudflare account is signed in and a widget named **MusicMail production authentication** has been created. It uses **Managed** mode, allows `app.musicmailapp.uk` and temporarily retains `musicmail.vercel.app`, and leaves pre-clearance disabled. Local development can use a separate widget; localhost is not allowed by this production widget.
 
 Its public site key is configured in Vercel Production as `NEXT_PUBLIC_TURNSTILE_SITE_KEY` with type Config. The operator saved the matching secret privately in Supabase; it is not required in Vercel, local env files or application source. Supabase Auth performs the one-time server-side token verification. See [Supabase CAPTCHA setup](https://supabase.com/docs/guides/auth/auth-captcha) and [Cloudflare widget management](https://developers.cloudflare.com/turnstile/get-started/widget-management/dashboard/).
 
@@ -21,3 +21,9 @@ The hosted Auth test stopped at the first challenge wait before any fixture sign
 The operator confirms the production login succeeded after the managed challenge. End-to-end CAPTCHA enforcement and normal-browser Auth acceptance are complete. The visible Chromium retry also stopped at the challenge stage before fixture creation; neither hosted Auth run is counted as passed after activation. The updated hosted administrator run also stops at `captcha_timeout`; its disposable account is removed in `finally`. Complete provider-dependent hosted Auth/admin regression acceptance and final release checks.
 
 After activation, typecheck/lint, **155 unit tests**, the production build, **15 optimized local browser journeys**, the complete PostgreSQL suite, **10 hosted schema/grant checks**, and **157 bidirectional isolation assertions** pass. The refreshed secret scan passes across **217 repository files, 389 historical blobs, 18 local and 10 production browser assets**. Production dependencies have zero audit findings; five reviewed development-only findings remain visible. See [current production release decision](google-gmail-acceptance.md#release-decision).
+
+## Owned-origin transition
+
+The operator approved adding the owned hostname to the same Managed widget. Cloudflare confirms the saved update succeeded. The application is deployed on https://app.musicmailapp.uk from `890b0a0`; missing/invalid-token enforcement passes there, and the operator confirms successful real Safari login. The new-origin automated Auth run still stops at `captcha_timeout` before fixture creation. No CAPTCHA bypass or test key was used.
+
+A dashboard-inspection tool result inadvertently included the widget secret. It was not added to source or Git. Operator rotation in Cloudflare and a matching private update in Supabase are required; browser-control credential rules require the operator to perform those steps. Keep CAPTCHA enabled and the public site key unchanged, then reverify real login and negative enforcement. Do not include either old or new secret in evidence or chat.
