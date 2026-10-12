@@ -2,7 +2,7 @@
 // Supabase Auth. Admin-generated email tokens test redemption, not delivery.
 import { chromium } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import { randomUUID, randomBytes } from "node:crypto";
+import { randomUUID, randomBytes, createHash } from "node:crypto";
 import strictAssert from "node:assert/strict";
 import Papa from "papaparse";
 let assertions = 0;
@@ -403,6 +403,28 @@ try {
       "openid email https://www.googleapis.com/auth/gmail.send",
     );
     assert.equal(consent.searchParams.get("code_challenge_method"), "S256");
+    assert.match(
+      consent.searchParams.get("client_id"),
+      /^[A-Za-z0-9-]+\.apps\.googleusercontent\.com$/,
+    );
+    const oauthCookie = (await context.cookies()).find(
+      (cookie) => cookie.name === "musicmail-oauth",
+    );
+    assert.ok(oauthCookie?.httpOnly);
+    assert.equal(oauthCookie.sameSite, "Lax");
+    assert.equal(oauthCookie.path, "/api/gmail");
+    if (origin.startsWith("https:")) assert.ok(oauthCookie.secure);
+    const saved = JSON.parse(decodeURIComponent(oauthCookie.value));
+    assert.equal(saved.userId, userId);
+    assert.equal(saved.state, consent.searchParams.get("state"));
+    assert.ok(saved.state.length >= 32);
+    assert.ok(
+      saved.expires > Date.now() && saved.expires <= Date.now() + 600000,
+    );
+    assert.equal(
+      consent.searchParams.get("code_challenge"),
+      createHash("sha256").update(saved.verifier).digest("base64url"),
+    );
   } else {
     assert.equal(connection.status(), 400);
     console.log(
@@ -417,6 +439,18 @@ try {
     gmailCallback.headers().location,
     origin + "/settings?gmail=failed",
   );
+  assert.equal(gmailCallback.status(), 307);
+  assert.ok(
+    !(await context.cookies()).some(
+      (cookie) => cookie.name === "musicmail-oauth",
+    ),
+  );
+  const invalidConnection = await admin
+    .from("gmail_connections")
+    .select("user_id", { count: "exact", head: true })
+    .eq("user_id", userId);
+  assert.equal(invalidConnection.error, null);
+  assert.equal(invalidConnection.count, 0);
   assert.equal(
     (
       await page.request.post(origin + "/api/gmail/disconnect", {

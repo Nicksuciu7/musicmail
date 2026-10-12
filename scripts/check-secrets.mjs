@@ -32,7 +32,11 @@ function scan(content, location) {
   for (const { name, value } of values)
     if (value.length >= 12 && content.includes(value))
       findings.push(`${location}: ${name}`);
-  if (/sb_secret_[A-Za-z0-9_-]{20,}|re_[A-Za-z0-9]{24,}/.test(content))
+  if (
+    /sb_secret_[A-Za-z0-9_-]{20,}|re_[A-Za-z0-9]{24,}|GOCSPX-[A-Za-z0-9_-]{20,}/.test(
+      content,
+    )
+  )
     findings.push(`${location}: provider secret pattern`);
 }
 const tracked = git(["ls-files", "-z"]).split("\0").filter(Boolean);

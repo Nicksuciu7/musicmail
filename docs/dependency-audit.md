@@ -1,13 +1,24 @@
-# Dependency security review — 2026-10-03
+# Dependency security review — 2026-10-12
 
 `npm audit` reports **five high findings, one underlying advisory**. `npm audit --omit=dev` reports **zero vulnerabilities**. No dependency version was changed just to hide these findings.
+
+## Compatible production patches
+
+The October 12 audit found two affected production packages in the previous lockfile. Both were patched without a major upgrade or security exception:
+
+- **Next.js 16.3.6 → 16.3.8**, with the matching ESLint configuration/plugin. [The upstream security release](https://github.com/vercel/next.js/releases/tag/v16.3.8) fixes image-optimization SSRF, cache poisoning/disclosure, metadata-image authorization and development MCP disclosure advisories. MusicMail has no remote image allowlist, Draft Mode or `use cache` configuration, but the production dependency gate still rejects affected versions.
+- **source-map-js 1.2.1 → 1.2.2**, the compatible transitive patch used by Next/PostCSS, Tailwind and development jsdom. [The maintainer release](https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2) fixes indexed-source-map denial of service (CVE-2026-93749). MusicMail does not accept source maps from user requests.
+
+The lockfile retains cross-platform optional dependencies and passed a fresh `npm ci` using Node 22/npm 10. Production audit is again zero. The development exception below remains restricted to the same advisory and dependency path; only the reviewed matching Next lint package versions changed to 16.3.8. Full audit remains nonzero.
+
+## Remaining development advisory
 
 The advisory is [GHSA-vfj7-8cjw-p6xm / CVE-2026-93687](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm): recursive brace-pattern parsing/compilation/expansion can exhaust the Node.js stack when given a deeply nested attacker-controlled glob. Affected `braces` versions are <=3.0.3; the advisory and npm registry currently list no patched release. Recheck before subsequent releases.
 
 | npm finding              | Installed version | Dependency path from MusicMail                | Classification / production reachability            |
 | ------------------------ | ----------------- | --------------------------------------------- | --------------------------------------------------- |
-| eslint-config-next       | 16.3.6            | direct development dependency                 | lint configuration; no runtime request input        |
-| @next/eslint-plugin-next | 16.3.6            | eslint-config-next → @next/eslint-plugin-next | development lint rules                              |
+| eslint-config-next       | 16.3.8            | direct development dependency                 | lint configuration; no runtime request input        |
+| @next/eslint-plugin-next | 16.3.8            | eslint-config-next → @next/eslint-plugin-next | development lint rules                              |
 | fast-glob                | 3.3.1             | above → fast-glob                             | development root-directory glob discovery           |
 | micromatch               | 4.0.8             | above → micromatch                            | transitive development pattern matching             |
 | braces                   | 3.0.3             | above → braces                                | vulnerable recursive walker; development dependency |

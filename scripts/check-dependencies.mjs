@@ -5,8 +5,8 @@ import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import assert from "node:assert/strict";
 const lock = JSON.parse(readFileSync("package-lock.json", "utf8"));
 const reviewed = {
-  "eslint-config-next": "16.3.6",
-  "@next/eslint-plugin-next": "16.3.6",
+  "eslint-config-next": "16.3.8",
+  "@next/eslint-plugin-next": "16.3.8",
   "fast-glob": "3.3.1",
   micromatch: "4.0.8",
   braces: "3.0.3",

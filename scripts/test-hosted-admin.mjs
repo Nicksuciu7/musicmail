@@ -20,9 +20,13 @@ const assert = new Proxy(strictAssert, {
   },
 });
 const origin = process.env.NEXT_PUBLIC_APP_URL;
-if (origin !== "http://localhost:3000")
+if (
+  !["http://localhost:3000", "https://musicmail.vercel.app"].includes(origin) ||
+  (origin.startsWith("https:") &&
+    process.env.MUSICMAIL_LIVE_ACCEPTANCE !== "true")
+)
   throw new Error(
-    "Administrator acceptance requires the local non-demo server.",
+    "Use the known local origin or explicitly opt into MusicMail production acceptance.",
   );
 const options = {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -602,6 +606,7 @@ try {
   );
   assert.ok(cookie?.httpOnly);
   assert.equal(cookie?.sameSite, "Lax");
+  if (origin.startsWith("https:")) assert.ok(cookie.secure);
   assert.ok(
     !(await page.evaluate(() => document.cookie)).includes("auth-token"),
   );
