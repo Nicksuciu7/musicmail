@@ -1,10 +1,10 @@
-# Public Gmail release preparation — 2026-10-12
+# Public Gmail release preparation — updated 2026-10-14
 
 Gmail's controlled connection, encrypted storage, automatic refresh, self-send, inbox delivery and disconnect/revocation acceptance are complete. This checkpoint concerns access for ordinary users outside Google's test list, separate from optional Google identity sign-in.
 
 ## Initial dashboard evidence before the domain transition
 
-The initial inspection of project `musicmail-510518` → Google Auth Platform → Audience showed **External / Testing**, with one test user. **Publish app** was disabled with an instruction to complete Branding. Homepage/privacy links were blank and the existing authorized domain was `musicmail.vercel.app`. Verification Center said verification was not required **because the app was Testing**; this is not a production approval. The owned-domain URLs have since been entered/saved; final dashboard persistence and publishing readiness are still to be verified after a browser-control timeout.
+The initial inspection of project `musicmail-510518` → Google Auth Platform → Audience showed **External / Testing**, with one test user. **Publish app** was disabled with an instruction to complete Branding. Homepage/privacy links were blank and the existing authorized domain was `musicmail.vercel.app`. Verification Center said verification was not required **because the app was Testing**; this is not a production approval. The owned-domain URLs and authorized domain have since been saved and verified after reload. On October 14, the operator-approved audience change was saved and verified as In production.
 
 Google requires an accurate public homepage, linked public privacy policy and verified domain ownership for the sensitive-scope review. `gmail.send` is sensitive. Testing-mode limits and seven-day refresh-token expiry remain relevant. References: [brand verification](https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification), [sensitive-scope verification](https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification), [OAuth policies](https://developers.google.com/identity/protocols/oauth2/production-readiness/policy-compliance).
 
@@ -44,12 +44,12 @@ The operator saved the exact root TXT proof in Porkbun and authorized the prepar
 | Supabase Auth Site URL                  | `https://app.musicmailapp.uk`                                                                                                         |
 | Supabase exact redirect allowlist       | `https://app.musicmailapp.uk/auth/callback`, `https://app.musicmailapp.uk/verify-email`, `https://app.musicmailapp.uk/reset-password` |
 | Existing Turnstile widget hostname      | Add `app.musicmailapp.uk`; preserve current `musicmail.vercel.app` during transition                                                  |
-| Existing Google Web client callback     | Add `https://app.musicmailapp.uk/api/gmail/callback`; preserve current callback during transition                                     |
-| Google Branding homepage                | `https://app.musicmailapp.uk/` — entered/saved; final persistence review pending                                                      |
-| Google Branding privacy link            | `https://app.musicmailapp.uk/privacy` — entered/saved; final persistence review pending                                               |
-| Google authorized domain                | `musicmailapp.uk` once ownership is verified                                                                                          |
+| Existing Google Web client callback     | `https://app.musicmailapp.uk/api/gmail/callback` only; temporary old callback retired after acceptance                                |
+| Google Branding homepage                | `https://app.musicmailapp.uk/` — saved; verified after reload                                                                         |
+| Google Branding privacy link            | `https://app.musicmailapp.uk/privacy` — saved; verified after reload                                                                  |
+| Google authorized domain                | `musicmailapp.uk` only; saved and verified after reload                                                                               |
 
-No new Google scope or secret is required. Do not switch Vercel's origin before the provider allowlists are ready. The source candidate adds the verified owned origin to explicit hosted-test allowlists while retaining opt-in. Canonical proxy redirects are prepared for GET/HEAD between the two known HTTPS origins only, using the configured origin. POST/PUT/PATCH/DELETE are not forwarded to another host, unknown/preview/local origins are unchanged, and assigning the path prevents protocol-relative open redirects. Public-page login/signup links already use the configured working origin. The operator explicitly approved the coordinated switch. Vercel Production Config, Supabase Site URL/exact redirects, the existing Turnstile hostname list and the existing Google client callback are saved. Google Branding homepage/privacy URLs are prepared; their persisted state needs final dashboard verification. Public Gmail publication and sensitive-scope review remain pending.
+No new Google scope or secret is required. Do not switch Vercel's origin before the provider allowlists are ready. The source candidate adds the verified owned origin to explicit hosted-test allowlists while retaining opt-in. Canonical proxy redirects are prepared for GET/HEAD between the two known HTTPS origins only, using the configured origin. POST/PUT/PATCH/DELETE are not forwarded to another host, unknown/preview/local origins are unchanged, and assigning the path prevents protocol-relative open redirects. Public-page login/signup links already use the configured working origin. The operator explicitly approved the coordinated switch. Vercel Production Config, Supabase Site URL/exact redirects, the existing Turnstile hostname list and the existing Google client callback are saved. Google Branding homepage/privacy URLs and the owned authorized domain persist after reload. The operator-approved OAuth audience change is now In production. Branding is verified/published; sensitive-scope review remains pending.
 
 ## Transition source validation
 
@@ -66,6 +66,26 @@ Application commit `890b0a0` is deployed as `dpl_CbhkxSrzTtcWnxhh15sWZRvkQgwb` (
 - Google client reload shows both old and owned Gmail callbacks. Cloudflare confirms the same Managed widget's hostname update succeeded; no scope or public site key changed.
 - Negative CAPTCHA enforcement passes on the owned origin. The operator confirms a successful Safari login on the owned domain. Hosted Auth automation still times out at the first real challenge before fixture creation; no bypass was used. Hosted admin regression remains open.
 - Hosted read-only security review passes: 23 migrations match and all 10 RLS/grant checks pass.
-- Secret scan passes across 220 repository files, 421 historical blobs, 18 local and 10 current production browser assets. A separate dashboard-inspection incident exposed the Turnstile secret in a tool result; operator rotation and matching Supabase update are required before release. No value is included here or in Git.
+- Secret scan passes across 220 repository files, 421 historical blobs, 18 local and 10 current production browser assets. A separate dashboard-inspection incident exposed the Turnstile secret in a tool result; the operator has completed rotation and a matching private Supabase update, confirmed successful real login, and negative enforcement was reverified afterward. No value is included here or in Git.
 
 New-origin confirmation/recovery inbox completion and provider-dependent regressions remain acceptance gates. The existing SMTP/templates are unchanged; they derive their host from the saved Site URL. No v1 release, version bump, main merge or tag was made.
+
+The post-rotation hosted Auth retry still reports `captcha_timeout` before fixture creation. [CI for the recorded transition passed](https://github.com/Nicksuciu7/musicmail/actions/runs/38314700794), including typecheck, lint, unit, optimized browser, build, dependency and database jobs.
+
+## Post-rotation email-proof and OAuth initiation acceptance
+
+The new `test:hosted:email-tokens` script passes against the owned origin using a disposable fixture. GET/HEAD leave signup/recovery proofs usable; explicit purpose-bound redemption, strict Origin checks, password requirements, host-bound Secure/HttpOnly/Lax cookies, replay rejection and reset logout pass. The production Gmail initiation response points to the exact owned callback with send-only scopes and checked PKCE/state/user/ten-minute binding; invalid callbacks clear state and return to fixed Settings. No Google consent was followed, no mail was sent, no token/cookie state was persisted, and the fixture was removed. These checks supplement, without weakening, the existing CAPTCHA-gated Auth/admin suites.
+
+After owned-origin login and initiation checks, the temporary old Vercel Gmail callback was removed from the existing Google client. Reopening its saved configuration shows only `https://app.musicmailapp.uk/api/gmail/callback`. This narrows the allowlist; no secret or scope changed. Old application page links still redirect.
+
+Google Branding now contains only the verified `musicmailapp.uk` authorized domain. The retired Vercel domain was removed after its client callback was retired; homepage/privacy URLs and the narrowed domain list persist after reload. OAuth Audience is now In production after the operator-approved change.
+
+## Google production audience and review preparation — October 14
+
+The operator explicitly approved changing the existing external OAuth app to production. Audience → Publish app → Confirm completed, and the saved page displays **In production** with **Back to testing**. No runtime permission or credential changed.
+
+The saved Data Access list was empty: the earlier verification-not-required message did not reflect MusicMail's actual requests. The existing runtime scopes were declared as `openid`, `https://www.googleapis.com/auth/userinfo.email` (Google's canonical declaration for runtime `email`) and `https://www.googleapis.com/auth/gmail.send`. The sensitive send scope, two non-sensitive identity scopes and the 695-character factual justification persist after reload; no restricted scope was added.
+
+Google's automated brand check passed. Publish branding completed; Branding and Verification Center state **Your branding has been verified and is being shown to users.** Data access is explicitly **not verified**. Prepare for verification identifies the missing field as **demo video**. The final review was not submitted and no approval is claimed. See the [exact video handoff and saved justification](google-verification-demo.md). This is a genuine remaining release gate; the production audience setting alone does not complete public Gmail readiness.
+
+Independent October 14 checks pass: owned-origin email-proof/OAuth-initiation acceptance, 23 hosted migrations/10 RLS-grant checks, and 157 fresh bidirectional A/B isolation assertions with fixture cleanup. Production dependencies have zero audit findings; the same five narrowly reviewed development-only findings remain visible. Lint passes. Final provider-dependent acceptance remains open.

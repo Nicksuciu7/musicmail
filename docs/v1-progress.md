@@ -1,6 +1,6 @@
 # v1 production foundation: current progress
 
-Updated 2026-10-12. **Not released.** Published version remains 0.9.1. The combined foundation/Calendar/appearance/admin candidate is deployed at https://app.musicmailapp.uk; the old Vercel alias redirects safe requests. Current authoritative evidence: [production provider checkpoint](google-gmail-acceptance.md). The earlier foundation report is [v1 acceptance](v1-acceptance.md).
+Updated 2026-10-14. **Not released.** Published version remains 0.9.1. The combined foundation/Calendar/appearance/admin candidate is deployed at https://app.musicmailapp.uk; the old Vercel alias redirects safe requests. Current authoritative evidence: [production provider checkpoint](google-gmail-acceptance.md). The earlier foundation report is [v1 acceptance](v1-acceptance.md).
 
 - 23 hosted migrations match; every public table has RLS and reviewed grants.
 - 157 live member A/B isolation assertions pass in both directions; fixtures removed.
@@ -10,8 +10,10 @@ Updated 2026-10-12. **Not released.** Published version remains 0.9.1. The combi
 - Production dependency audit clean; five dev findings share one unpatched advisory, reviewed as non-blocking with a narrow CI exception.
 - Repository/history/local/deployed browser secret scans pass.
 - Gmail consent, encrypted token storage, automatic refresh, one controlled self-send and inbox delivery are verified. Disconnect/revocation is verified against production storage and Google token rejection; the disposable self-test contact is archived with private send evidence retained.
-- **Blockers:** Turnstile enforcement and normal-browser login pass on the owned origin; rotate the Turnstile secret after a dashboard tool-output exposure, complete hosted Auth/admin regression and new-origin email acceptance, public Google audience/verification readiness, then final provider-dependent release checks.
+- **Blockers:** Turnstile enforcement and normal-browser login pass on the owned origin; secret rotation after the dashboard tool-output exposure is complete; complete hosted Auth/admin regression and new-origin email acceptance, Google sensitive-scope verification (real demo video and review), then final provider-dependent release checks.
 - The owned domain has working DNS/HTTPS and Google-confirmed ownership. Privacy/support pages are deployed with Nicholas Suciu and musicmailsupport@gmail.com; the approved application-origin/provider transition is saved and deployed from `890b0a0`, and real Safari login on the new origin passes. See [public Gmail checkpoint](google-public-release.md).
+- Owned-origin one-time email proofs and Gmail initiation pass via `test:hosted:email-tokens`; no SMTP or consent operation is implied by that test. The temporary old Gmail callback was retired after these checks.
+- Google OAuth audience is In production; branding is verified and published. Existing send-only scopes/justification are saved. The real demo video is the missing submission field, and scope approval is pending.
 - No v1 version bump, release commit, tag, push or GitHub release. Publication remains authorized only after actual blockers pass.
 
 The dated record below explains earlier work; its older setup/pending instructions are superseded by the acceptance report and current Auth/deployment documentation.

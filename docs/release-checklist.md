@@ -34,9 +34,11 @@ See [feature acceptance](calendar-theme-acceptance.md); no v1 publication is aut
 - [x] Actual Google consent/token exchange, Gmail API/test audience acceptance and controlled production self-send/inbox delivery/automatic refresh/disconnect; private send evidence retained, disposable contact archived.
 - [x] Owned application domain DNS/HTTPS and Google Search Console domain ownership; public privacy/support pages use the confirmed operator/contact.
 - [x] Approved coordinated application-origin/provider redirect transition to the owned domain; safe alias redirects, exact Origin rejection, saved provider settings and real Safari login verified.
-- [ ] Rotate the Turnstile secret exposed in dashboard tool output, update Supabase privately and verify real login/enforcement again.
+- [x] Operator rotated the exposed Turnstile secret, updated Supabase privately and confirmed real login; negative enforcement reverified.
+- [x] New-origin explicit email-proof redemption, prefetch/replay/purpose/Origin protections, secure cookies and Gmail initiation/callback boundaries.
 - [ ] New-origin confirmation/recovery inbox acceptance and provider-dependent regression.
-- [ ] Public Google audience and sensitive-scope verification readiness; current External/Testing mode limits users and refresh-token lifetime.
+- [x] Operator-approved Google External/In production audience; branding verified and published; existing send-only scopes and justification declared.
+- [ ] Google sensitive-scope review: actual demo video is missing; final submission and Google approval remain open. See [exact handoff](google-verification-demo.md).
 - [ ] Final changed-provider/release-candidate acceptance and scan after these configuration changes.
 
 Google identity login, MFA, collaboration UI and automatic external calendar sync are optional. Internal Calendar/manual exports and appearance are deployed in the combined feature candidate; main merge and final changed-provider acceptance remain required before v1. The reviewed development-only braces advisory is non-blocking; production dependencies are clean after compatible patches. DMARC monitoring policy is valid; stronger enforcement and backup/monitoring rehearsals are hardening. See [current provider gates](google-gmail-acceptance.md#release-decision).
